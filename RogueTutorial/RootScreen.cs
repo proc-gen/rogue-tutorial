@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 using RogueTutorial.Components;
 using RogueTutorial.Systems;
+using RogueTutorial.Map;
 
 namespace RogueTutorial
 {
@@ -18,7 +19,7 @@ namespace RogueTutorial
         World world;
         Query renderablesQuery;
         Query playerQuery;
-        LeftMoverSystem leftMoverSystem;
+
         public RootScreen(int width, int height)
             : base(width, height)
         {
@@ -29,37 +30,31 @@ namespace RogueTutorial
                                 , new Renderable() {Glyph = new ColoredGlyph(Color.White, Color.Black, '@')}
                                 , new Player());
 
-            for(int i = 0; i < 10; i++)
-            {
-                world.CreateEntity(new Position() { Point = new Point(i * 7, 20) },
-                                    new Renderable() { Glyph = new ColoredGlyph(Color.Red, Color.Black, 'O') },
-                                    new LeftMover());
-            }
+            world.SetData(MapGenerator.DefaultGenerator(width, height));
 
             renderablesQuery = world.CreateQuery()
                                 .Has<Position>()
                                 .Has<Renderable>();
+
             playerQuery = world.CreateQuery().Has<Player>();
-            leftMoverSystem = new LeftMoverSystem(world.CreateQuery().Has<LeftMover>());
             this.Surface.IsDirty = true;
         }
 
 
         public override void Update(TimeSpan delta)
         {
-            leftMoverSystem.Run(delta);
-            this.Surface.IsDirty = true;
             base.Update(delta);
         }
 
         private bool tryMovePlayer(Direction direction)
         {
             bool retVal = false;
+            var map = world.GetData<Map.Map>();
 
             playerQuery.Foreach((ref Position position) =>
             {
                 Point newPoint = position.Point.Add(direction);
-                if(newPoint.X >= 0 && newPoint.X < 80 && newPoint.Y >= 0 && newPoint.Y < 25)
+                if(map.GetMapCell(newPoint.X,newPoint.Y) != TileType.Wall)
                 {
                     position.Point = newPoint;
                     retVal = true;
@@ -100,6 +95,22 @@ namespace RogueTutorial
             if (this.Surface.IsDirty)
             {
                 this.Surface.Clear();
+                var map = world.GetData<Map.Map>();
+                for(int i = 0; i < map.Width; i++)
+                {
+                    for(int j = 0; j < map.Height; j++)
+                    {
+                        switch (map.GetMapCell(i, j))
+                        {
+                            case TileType.Floor:
+                                TileGlyphs.Floor.CopyAppearanceTo(this.Surface[i, j]);
+                                break;
+                            case TileType.Wall:
+                                TileGlyphs.Wall.CopyAppearanceTo(this.Surface[i, j]);
+                                break;
+                        }
+                    }
+                }
                 renderablesQuery.Foreach((ref Position position, ref Renderable renderable) =>
                 {
                     renderable.Glyph.CopyAppearanceTo(this.Surface[position.Point]);
