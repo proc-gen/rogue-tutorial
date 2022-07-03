@@ -16,7 +16,11 @@ namespace RogueTutorial.Map
 
     public static class TileGlyphs
     {
-        public static ColoredGlyph Wall = new ColoredGlyph(Color.White, Color.Black, (char)TileType.Wall);
-        public static ColoredGlyph Floor = new ColoredGlyph(Color.White, Color.Black, (char)TileType.Floor);
+        public static ColoredGlyph Wall = new ColoredGlyph(Color.Gray, Color.Black, (char)TileType.Wall);
+        public static ColoredGlyph WallVisible = new ColoredGlyph(Color.LimeGreen, Color.Black, (char)TileType.Wall);
+
+        public static ColoredGlyph Floor = new ColoredGlyph(Color.Gray, Color.Black, (char)TileType.Floor);
+        public static ColoredGlyph FloorVisible = new ColoredGlyph(Color.LimeGreen, Color.Black, (char)TileType.Floor);
+
     }
 }
