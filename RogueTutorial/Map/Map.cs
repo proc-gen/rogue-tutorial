@@ -13,11 +13,14 @@ namespace RogueTutorial.Map
         public int Width { get; private set; }
         public int Height { get; private set; }
 
+        public List<Rectangle> Rooms { get; set; }
+
         public Map(int width, int height)
         {
             Height = height;
             Width = width;
             _mapGrid = new TileType[width * height];
+            Rooms = new List<Rectangle>();
         }
 
         public TileType GetMapCell(int x, int y)

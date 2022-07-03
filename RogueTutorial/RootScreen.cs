@@ -26,11 +26,15 @@ namespace RogueTutorial
             this.UseMouse = false;
 
             world = World.Create("My World");
-            world.CreateEntity(new Position() { Point = new Point(this.Width/2, this.Height/2) }
+            Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height);
+
+            world.SetData(map); 
+            
+            world.CreateEntity(new Position() { Point = map.Rooms.First().Center() }
                                 , new Renderable() {Glyph = new ColoredGlyph(Color.White, Color.Black, '@')}
                                 , new Player());
 
-            world.SetData(MapGenerator.DefaultGenerator(width, height));
+            
 
             renderablesQuery = world.CreateQuery()
                                 .Has<Position>()
@@ -67,25 +71,30 @@ namespace RogueTutorial
         public override bool ProcessKeyboard(Keyboard keyboard)
         {
             bool handled = false;
-            if (keyboard.IsKeyPressed(Keys.Left))
+            if (keyboard.IsKeyPressed(Keys.Left) || keyboard.IsKeyPressed(Keys.NumPad4) || keyboard.IsKeyPressed(Keys.H))
             {
                 this.Surface.IsDirty = tryMovePlayer(Direction.Left);
                 handled = this.Surface.IsDirty;
             }
-            if (keyboard.IsKeyPressed(Keys.Right))
+            if (keyboard.IsKeyPressed(Keys.Right) || keyboard.IsKeyPressed(Keys.NumPad6) || keyboard.IsKeyPressed(Keys.L))
             {
                 this.Surface.IsDirty = tryMovePlayer(Direction.Right);
                 handled = this.Surface.IsDirty;
             }
-            if (keyboard.IsKeyPressed(Keys.Up))
+            if (keyboard.IsKeyPressed(Keys.Up) || keyboard.IsKeyPressed(Keys.NumPad8) || keyboard.IsKeyPressed(Keys.K))
             {
                 this.Surface.IsDirty = tryMovePlayer(Direction.Up);
                 handled = this.Surface.IsDirty;
             }
-            if (keyboard.IsKeyPressed(Keys.Down))
+            if (keyboard.IsKeyPressed(Keys.Down) || keyboard.IsKeyPressed(Keys.NumPad2) || keyboard.IsKeyPressed(Keys.J))
             {
                 this.Surface.IsDirty = tryMovePlayer(Direction.Down);
                 handled = this.Surface.IsDirty;
+            }
+            if (keyboard.IsKeyPressed(Keys.Escape) || keyboard.IsKeyPressed(Keys.Q)) 
+            {
+                Game.Instance.MonoGameInstance.Exit();
+                handled = true;
             }
             return handled;
         }
