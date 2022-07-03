@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SadConsole.Host.MonoGame" Version="9.2.0" />
+    <PackageReference Include="RogueSharp" Version="4.2.0" />
+    <PackageReference Include="SadConsole.Host.MonoGame" Version="9.2.2" />
   </ItemGroup>
 
 </Project>
