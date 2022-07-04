@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace RogueTutorial.Systems
 {
-    public abstract class System
+    public abstract class ECSSystem
     {
         protected Query query;
         protected World world;
-        public System(World world, Query query)
+        public ECSSystem(World world, Query query)
         {
             this.query = query;
             this.world = world;
