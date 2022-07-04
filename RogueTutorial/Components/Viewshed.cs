@@ -12,5 +12,6 @@ namespace RogueTutorial.Components
     {
         public List<Point> VisibleTiles { get; set; }
         public int Range { get; set; }
+        public bool Dirty { get; set; }
     }
 }
