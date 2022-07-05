@@ -43,7 +43,8 @@ namespace RogueTutorial
                                 , new Renderable() { Glyph = new ColoredGlyph(Color.Yellow, Color.Black, '@') }
                                 , new Player()
                                 , new Viewshed() { VisibleTiles = new List<Point>(), Range = 8, Dirty = true }
-                                , new Name() { EntityName = "Player"});
+                                , new Name() { EntityName = "Player"}
+                                , new BlocksTile());
 
             if (map.Rooms.Count > 1)
             {
@@ -55,7 +56,8 @@ namespace RogueTutorial
                                         , new Renderable() { Glyph = new ColoredGlyph(Color.Red, Color.Black, monsterId == 1 ? 'g' : 'o')}
                                         , new Viewshed() { VisibleTiles = new List<Point>(), Range = 8, Dirty = true }
                                         , new Monster()
-                                        , new Name () { EntityName = (monsterId == 1 ? "Goblin" : "Orc") + " #" + i.ToString()});
+                                        , new Name () { EntityName = (monsterId == 1 ? "Goblin" : "Orc") + " #" + i.ToString()}
+                                        , new BlocksTile());
                 }
             }
         }
@@ -68,8 +70,9 @@ namespace RogueTutorial
 
             playerQuery = world.CreateQuery().Has<Player>();
 
-            systems = new List<Systems.ECSSystem>();
+            systems = new List<ECSSystem>();
 
+            
             systems.Add(new VisibilitySystem(world
                                                 , world.CreateQuery()
                                                     .Has<Position>()
@@ -81,6 +84,11 @@ namespace RogueTutorial
                                                 .Has<Viewshed>()
                                                 .Has<Monster>()
                                             , playerQuery));
+            systems.Add(new PositionSystem(world
+                                            , world.CreateQuery()
+                                                .Has<Position>()
+                                                .Has<BlocksTile>()));
+            
         }
 
         public override void Update(TimeSpan delta)
@@ -102,13 +110,18 @@ namespace RogueTutorial
             bool retVal = false;
             var map = world.GetData<Map.Map>();
 
-            playerQuery.Foreach((ref Position position, ref Viewshed visibility) =>
+            playerQuery.Foreach((ref Position position, ref Viewshed visibility, ref Name name) =>
             {
                 Point newPoint = position.Point.Add(direction);
-                if(map.GetMapCell(newPoint.X,newPoint.Y) != TileType.Wall)
+                if(map.IsCellWalkable(newPoint.X,newPoint.Y))
                 {
                     position.Point = newPoint;
                     visibility.Dirty = true;
+
+                    map.SetCellWalkable(position.PreviousPoint.X, position.PreviousPoint.Y, true);
+                    map.SetCellWalkable(position.Point.X, position.Point.Y, false);
+                    position.Dirty = false;
+
                     retVal = true;
                 }
             });
@@ -136,10 +149,28 @@ namespace RogueTutorial
                 {
                     this.Surface.IsDirty = tryMovePlayer(Direction.Down);
                 }
+                if (keyboard.IsKeyPressed(Keys.NumPad9) || keyboard.IsKeyPressed(Keys.Y))
+                {
+                    this.Surface.IsDirty = tryMovePlayer(Direction.UpRight);
+                }
+                if (keyboard.IsKeyPressed(Keys.NumPad7) || keyboard.IsKeyPressed(Keys.U))
+                {
+                    this.Surface.IsDirty = tryMovePlayer(Direction.UpLeft);
+                }
+                if (keyboard.IsKeyPressed(Keys.NumPad3) || keyboard.IsKeyPressed(Keys.N))
+                {
+                    this.Surface.IsDirty = tryMovePlayer(Direction.DownRight);
+                }
+                if (keyboard.IsKeyPressed(Keys.NumPad1) || keyboard.IsKeyPressed(Keys.B))
+                {
+                    this.Surface.IsDirty = tryMovePlayer(Direction.DownLeft);
+                }
+
                 if (keyboard.IsKeyPressed(Keys.Escape) || keyboard.IsKeyPressed(Keys.Q))
                 {
                     Game.Instance.MonoGameInstance.Exit();
                 }
+
                 if (this.Surface.IsDirty)
                 {
                     world.SetData(RunState.Running);

@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 using RogueTutorial.Map;
 using RogueTutorial.Components;
 
+using RogueSharp;
+
+using Point = SadRogue.Primitives.Point;
+
 namespace RogueTutorial.Systems
 {
     internal class MonsterSystem : ECSSystem
@@ -22,11 +26,31 @@ namespace RogueTutorial.Systems
         {
             Entity player = playerQuery.GetEntities()[0];
             Position playerPosition = player.Get<Position>();
-            query.Foreach((Entity entity, ref Position position, ref Viewshed visibility, ref Name name) =>
+
+            query.Foreach((in Map.Map map, Entity entity, ref Position position, ref Viewshed visibility, ref Name name) =>
             {
                 if (visibility.VisibleTiles.Contains(playerPosition.Point))
                 {
-                    System.Diagnostics.Debug.WriteLine(name.EntityName + " shouts insults!");
+                    Path path = map.FindPath(position.Point, playerPosition.Point);
+                    if(path != null && path.Steps.ElementAtOrDefault(1) != null)
+                    {
+                        if (path.Steps.Count() > 2)
+                        {
+                            ICell nextCell = path.Steps.ElementAt(1);
+                            if (map.IsCellWalkable(nextCell.X, nextCell.Y))
+                            {
+                                position.Point = new Point(nextCell.X, nextCell.Y);
+                                visibility.Dirty = true;
+                                map.SetCellWalkable(position.PreviousPoint.X, position.PreviousPoint.Y, true);
+                                map.SetCellWalkable(position.Point.X, position.Point.Y, false);
+                                position.Dirty = false;
+                            }
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine(name.EntityName + " shouts insults");
+                        }
+                    }
                 }
             });
         }

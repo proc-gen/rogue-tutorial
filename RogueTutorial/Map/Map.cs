@@ -13,6 +13,7 @@ namespace RogueTutorial.Map
     internal class Map
     {
         private TileType[] _mapGrid;
+        private bool[] _blocked;
         public int Width { get; private set; }
         public int Height { get; private set; }
         public List<Rectangle> Rooms { get; set; }
@@ -24,6 +25,7 @@ namespace RogueTutorial.Map
             Height = height;
             Width = width;
             _mapGrid = new TileType[width * height];
+            _blocked = new bool[width * height];
             Rooms = new List<Rectangle>();
             map = new RogueSharp.Map(width, height);
         }
@@ -36,7 +38,20 @@ namespace RogueTutorial.Map
         public void SetMapCell(int x, int y, TileType tileType)
         {
             _mapGrid[y * Width + x] = tileType;
+            _blocked[y * Width + x] = tileType == TileType.Wall;
             map.SetCellProperties(x, y, tileType == TileType.Floor, tileType == TileType.Floor, false);
+        }
+
+        public bool IsCellWalkable(int x, int y)
+        {
+            return !_blocked[y * Width + x];//map.IsWalkable(x, y);
+        }
+
+        public void SetCellWalkable(int x, int y, bool walkable)
+        {
+            ICell cell = map.GetCell(x, y);
+            map.SetCellProperties(x, y, cell.IsTransparent, walkable);
+            _blocked[y * Width + x] = !walkable;
         }
 
         public List<Point> ComputeFOV(int x, int y, int radius, bool lightWalls, bool updateMap)
@@ -62,6 +77,24 @@ namespace RogueTutorial.Map
         public bool IsMapCellExplored(int x, int y)
         {
             return map.IsExplored(x, y);
+        }
+
+        public Path FindPath(Point start, Point end)
+        {
+            ICell oldStartCell = map.GetCell(start.X, start.Y);
+            ICell oldEndCell = map.GetCell(end.X, end.Y);
+            
+            //Must make cells walkable prior to pathfinding
+            //map.SetCellProperties(oldStartCell.X, oldStartCell.Y, true, true);
+            //map.SetCellProperties(oldEndCell.X, oldEndCell.Y, true, true);
+
+            PathFinder pathFinder = new PathFinder(map, 1.45);
+            Path path = pathFinder.TryFindShortestPath(oldStartCell, oldEndCell);
+
+            //map.SetCellProperties(oldStartCell.X, oldStartCell.Y, oldStartCell.IsTransparent, oldStartCell.IsWalkable);
+            //map.SetCellProperties(oldEndCell.X, oldEndCell.Y, oldEndCell.IsTransparent, oldEndCell.IsWalkable);
+
+            return path;
         }
     }
 }
