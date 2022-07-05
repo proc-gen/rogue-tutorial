@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using RogueSharp;
 
 using Point = SadRogue.Primitives.Point;
+using SimpleECS;
 
 namespace RogueTutorial.Map
 {
@@ -14,6 +15,8 @@ namespace RogueTutorial.Map
     {
         private TileType[] _mapGrid;
         private bool[] _blocked;
+        private Dictionary<Point, List<Entity>> _tileContent;
+
         public int Width { get; private set; }
         public int Height { get; private set; }
         public List<Rectangle> Rooms { get; set; }
@@ -28,6 +31,7 @@ namespace RogueTutorial.Map
             _blocked = new bool[width * height];
             Rooms = new List<Rectangle>();
             map = new RogueSharp.Map(width, height);
+            _tileContent = new Dictionary<Point, List<Entity>>();
         }
 
         public TileType GetMapCell(int x, int y)
@@ -95,6 +99,28 @@ namespace RogueTutorial.Map
             //map.SetCellProperties(oldEndCell.X, oldEndCell.Y, oldEndCell.IsTransparent, oldEndCell.IsWalkable);
 
             return path;
+        }
+
+        public void ResetTileContent()
+        {
+            _tileContent.Clear();
+        }
+
+        public void AddCellEntity(Entity entity, Point point)
+        {
+            if (_tileContent.ContainsKey(point))
+            {
+                _tileContent[point].Add(entity);
+            }
+            else
+            {
+                _tileContent[point] = new List<Entity>() { entity };
+            }
+        }
+
+        public List<Entity> GetCellEntities(Point point)
+        {
+            return _tileContent.ContainsKey(point) ? _tileContent[point] : new List<Entity>();
         }
     }
 }

@@ -19,15 +19,11 @@ namespace RogueTutorial.Systems
         public override void Run(TimeSpan delta)
         {
             Map.Map map = world.GetData<Map.Map>();
+            map.ResetTileContent();
 
-            query.Foreach((Entity entity, ref Position position) =>
+            query.Foreach((Entity entity, ref Position position, ref BlocksTile blocksTile) =>
             {
-                /*if (position.Dirty)
-                {
-                    map.SetCellWalkable(position.PreviousPoint.X, position.PreviousPoint.Y, true);
-                    map.SetCellWalkable(position.Point.X, position.Point.Y, false);
-                    position.Dirty = false;
-                }*/
+                map.AddCellEntity(entity, position.Point);
             });
         }
     }
