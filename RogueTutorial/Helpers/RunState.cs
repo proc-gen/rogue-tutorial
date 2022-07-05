@@ -8,7 +8,9 @@ namespace RogueTutorial.Helpers
 {
     public enum RunState
     {
-        Paused,
-        Running
+        AwaitingInput,
+        PreRun,
+        PlayerTurn,
+        MonsterTurn
     }
 }

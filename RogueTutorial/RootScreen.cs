@@ -37,14 +37,15 @@ namespace RogueTutorial
             Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height);
 
             world.SetData(map);
-            world.SetData(RunState.Running);
+            world.SetData(RunState.PreRun);
 
             world.CreateEntity(new Position() { Point = map.Rooms.First().Center() }
                                 , new Renderable() { Glyph = new ColoredGlyph(Color.Yellow, Color.Black, '@') }
                                 , new Player()
                                 , new Viewshed() { VisibleTiles = new List<Point>(), Range = 8, Dirty = true }
                                 , new Name() { EntityName = "Player"}
-                                , new BlocksTile());
+                                , new BlocksTile()
+                                , new CombatStats() { MaxHp = 30, Hp = 30, Defense = 2, Power = 5});
 
             if (map.Rooms.Count > 1)
             {
@@ -57,7 +58,8 @@ namespace RogueTutorial
                                         , new Viewshed() { VisibleTiles = new List<Point>(), Range = 8, Dirty = true }
                                         , new Monster()
                                         , new Name () { EntityName = (monsterId == 1 ? "Goblin" : "Orc") + " #" + i.ToString()}
-                                        , new BlocksTile());
+                                        , new BlocksTile()
+                                        , new CombatStats() { MaxHp = 16, Hp = 16, Defense = 1, Power = 4 });
                 }
             }
         }
@@ -86,23 +88,50 @@ namespace RogueTutorial
                                             , playerQuery));
             systems.Add(new PositionSystem(world
                                             , world.CreateQuery()
-                                                .Has<Position>()
-                                                .Has<BlocksTile>()));
+                                                .Has<Position>()));
+            systems.Add(new MeleeCombatSystem(world
+                                                , world.CreateQuery()
+                                                    .Has<WantsToMelee>()));
+            systems.Add(new DamageSystem(world
+                                            , world.CreateQuery()
+                                                .Has<SufferDamage>()));
+            systems.Add(new DeleteTheDead(world
+                                            , world.CreateQuery()
+                                                .Has<CombatStats>()));
             
         }
 
         public override void Update(TimeSpan delta)
         {
-            if (world.GetData<RunState>() == RunState.Running)
+            switch (world.GetData<RunState>())
             {
-                foreach (Systems.ECSSystem system in systems)
-                {
-                    system.Run(delta);
-                }
-                world.SetData(RunState.Paused);
+                case RunState.PreRun:
+                    runSystems(delta);
+                    world.SetData(RunState.AwaitingInput);
+                    break;
+                case RunState.AwaitingInput:
+                    //Do Nothing
+                    break;
+                case RunState.PlayerTurn:
+                    runSystems(delta);
+                    world.SetData(RunState.MonsterTurn);
+                    break;
+                case RunState.MonsterTurn:
+                    runSystems(delta);
+                    world.SetData(RunState.AwaitingInput);
+                    break;
             }
 
+
             base.Update(delta);
+        }
+
+        private void runSystems(TimeSpan delta)
+        {
+            foreach (Systems.ECSSystem system in systems)
+            {
+                system.Run(delta);
+            }
         }
 
         private bool tryMovePlayer(Direction direction)
@@ -110,7 +139,7 @@ namespace RogueTutorial
             bool retVal = false;
             var map = world.GetData<Map.Map>();
 
-            playerQuery.Foreach((ref Position position, ref Viewshed visibility, ref Name name) =>
+            playerQuery.Foreach((Entity player, ref Position position, ref Viewshed visibility, ref Name name) =>
             {
                 Point newPoint = position.Point.Add(direction);
                 if(map.IsCellWalkable(newPoint.X,newPoint.Y))
@@ -124,6 +153,19 @@ namespace RogueTutorial
 
                     retVal = true;
                 }
+                else
+                {
+                    List<Entity> cellEntities = map.GetCellEntities(newPoint);
+                    if(cellEntities.Count > 0)
+                    {
+                        Entity monster = cellEntities.Where(a => a.Has<Monster>()).FirstOrDefault();
+                        if(monster)
+                        {
+                            player.Set(new WantsToMelee() { Target = monster});
+                            retVal = true;
+                        }
+                    }
+                }
             });
 
             return retVal;
@@ -131,7 +173,7 @@ namespace RogueTutorial
 
         public override bool ProcessKeyboard(Keyboard keyboard)
         {
-            if (world.GetData<RunState>() == RunState.Paused)
+            if (world.GetData<RunState>() == RunState.AwaitingInput)
             {
                 if (keyboard.IsKeyPressed(Keys.Left) || keyboard.IsKeyPressed(Keys.NumPad4) || keyboard.IsKeyPressed(Keys.H))
                 {
@@ -173,7 +215,7 @@ namespace RogueTutorial
 
                 if (this.Surface.IsDirty)
                 {
-                    world.SetData(RunState.Running);
+                    world.SetData(RunState.PlayerTurn);
                 }
             }
 
