@@ -12,6 +12,7 @@ using RogueTutorial.Components;
 using RogueTutorial.Systems;
 using RogueTutorial.Map;
 using RogueTutorial.Helpers;
+using RogueTutorial.UI;
 
 namespace RogueTutorial
 {
@@ -20,14 +21,17 @@ namespace RogueTutorial
         World world;
         Query renderablesQuery;
         Query playerQuery;
+        Gui gui;
         List<Systems.ECSSystem> systems;
+
+        Point? mousePosition;
 
         public RootScreen(int width, int height)
             : base(width, height)
         {
-            createWorld(width, height);
+            createWorld(width, height - 10);
             initializeSystems();
-            
+            initializeGui();
             this.Surface.IsDirty = true;
         }
 
@@ -99,6 +103,12 @@ namespace RogueTutorial
                                             , world.CreateQuery()
                                                 .Has<CombatStats>()));
             
+        }
+
+        private void initializeGui()
+        {
+            gui = new Gui(world, playerQuery);
+            world.SetData(new GameLog() { Entries = new List<string>() { "Welcome to Rusty Roguelike" } });
         }
 
         public override void Update(TimeSpan delta)
@@ -222,55 +232,88 @@ namespace RogueTutorial
             return true;
         }
 
+        public override bool ProcessMouse(MouseScreenObjectState state)
+        {
+            if (state.Mouse.IsMouseOverScreenObjectSurface(this))
+            {
+                if(mousePosition != state.CellPosition)
+                {
+                    mousePosition = state.CellPosition;
+                    Surface.IsDirty = true;
+                }
+            }
+            else
+            {
+                if(mousePosition != null)
+                {
+                    Surface.IsDirty = true;
+                }
+                mousePosition = null;
+            }
+            return base.ProcessMouse(state);
+        }
+
         public override void Render(TimeSpan delta)
         {
-            if (this.Surface.IsDirty)
+            if (Surface.IsDirty)
             {
-                this.Surface.Clear();
+                Surface.Clear();
                 Map.Map map = world.GetData<Map.Map>();
                 Entity player = playerQuery.GetEntities()[0];
                 Viewshed playerVisibility = player.Get<Viewshed>();
 
-                for(int i = 0; i < map.Width; i++)
+                renderMap(map, playerVisibility);
+                renderEntities(playerVisibility);                
+
+                gui.Render(Surface, mousePosition);
+            }
+            base.Render(delta);
+        }
+
+        private void renderMap(Map.Map map, Viewshed playerVisibility)
+        {
+            for (int i = 0; i < map.Width; i++)
+            {
+                for (int j = 0; j < map.Height; j++)
                 {
-                    for (int j = 0; j < map.Height; j++)
+                    if (playerVisibility.VisibleTiles.Any(a => a.X == i && a.Y == j))
                     {
-                        if (playerVisibility.VisibleTiles.Any(a => a.X == i && a.Y == j)) 
-                        { 
-                            switch (map.GetMapCell(i, j))
-                            {
-                                case TileType.Floor:
-                                    TileGlyphs.FloorVisible.CopyAppearanceTo(this.Surface[i, j]);
-                                    break;
-                                case TileType.Wall:
-                                    TileGlyphs.WallVisible.CopyAppearanceTo(this.Surface[i, j]);
-                                    break;
-                            }
-                        }
-                        else if(map.IsMapCellExplored(i, j))
+                        switch (map.GetMapCell(i, j))
                         {
-                            switch (map.GetMapCell(i, j))
-                            {
-                                case TileType.Floor:
-                                    TileGlyphs.Floor.CopyAppearanceTo(this.Surface[i, j]);
-                                    break;
-                                case TileType.Wall:
-                                    TileGlyphs.Wall.CopyAppearanceTo(this.Surface[i, j]);
-                                    break;
-                            }
+                            case TileType.Floor:
+                                TileGlyphs.FloorVisible.CopyAppearanceTo(Surface[i, j]);
+                                break;
+                            case TileType.Wall:
+                                TileGlyphs.WallVisible.CopyAppearanceTo(Surface[i, j]);
+                                break;
+                        }
+                    }
+                    else if (map.IsMapCellExplored(i, j))
+                    {
+                        switch (map.GetMapCell(i, j))
+                        {
+                            case TileType.Floor:
+                                TileGlyphs.Floor.CopyAppearanceTo(Surface[i, j]);
+                                break;
+                            case TileType.Wall:
+                                TileGlyphs.Wall.CopyAppearanceTo(Surface[i, j]);
+                                break;
                         }
                     }
                 }
-                renderablesQuery.Foreach((ref Position position, ref Renderable renderable) =>
-                {
-                    Point point = position.Point;
-                    if (playerVisibility.VisibleTiles.Any(a => a.X == point.X && a.Y == point.Y))
-                    {
-                        renderable.Glyph.CopyAppearanceTo(this.Surface[position.Point]);
-                    }
-                });
             }
-            base.Render(delta);
+        }
+
+        private void renderEntities(Viewshed playerVisibility)
+        {
+            renderablesQuery.Foreach((ref Position position, ref Renderable renderable) =>
+            {
+                Point point = position.Point;
+                if (playerVisibility.VisibleTiles.Any(a => a.X == point.X && a.Y == point.Y))
+                {
+                    renderable.Glyph.CopyAppearanceTo(Surface[position.Point]);
+                }
+            });
         }
     }
 }
