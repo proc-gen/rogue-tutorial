@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using RogueTutorial.Components;
+using RogueTutorial.Helpers;
 
 namespace RogueTutorial.Systems
 {
@@ -17,7 +18,7 @@ namespace RogueTutorial.Systems
 
         public override void Run(TimeSpan delta)
         {
-            query.Foreach((Entity entity, ref WantsToMelee wantsMelee, ref Name name, ref CombatStats stats) =>
+            query.Foreach((in GameLog log, Entity entity, ref WantsToMelee wantsMelee, ref Name name, ref CombatStats stats) =>
             {
                 if(stats.Hp > 0)
                 {
@@ -37,11 +38,11 @@ namespace RogueTutorial.Systems
                             targetDamage.NewDamage(damage);
                             wantsMelee.Target.Set(targetDamage);
 
-                            System.Diagnostics.Debug.WriteLine(name.EntityName + " hits " + targetName.EntityName + ", for " + damage + " hp");
+                            log.Entries.Add(name.EntityName + " hits " + targetName.EntityName + ", for " + damage + " hp");
                         }
                         else
                         {
-                            System.Diagnostics.Debug.WriteLine(name.EntityName + " is unable to hurt " + targetName.EntityName);
+                            log.Entries.Add(name.EntityName + " is unable to hurt " + targetName.EntityName);
                         }
                     }
                 }

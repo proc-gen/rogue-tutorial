@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using RogueTutorial.Components;
+using RogueTutorial.Helpers;
 
 namespace RogueTutorial.Systems
 {
@@ -17,7 +18,7 @@ namespace RogueTutorial.Systems
 
         public override void Run(TimeSpan delta)
         {
-            query.Foreach((in Map.Map map, Entity entity, ref CombatStats stats, ref Position position) =>
+            query.Foreach((in Map.Map map, in GameLog log, Entity entity, ref CombatStats stats, ref Position position, ref Name name) =>
             {
                 if(stats.Hp < 1)
                 {
@@ -25,10 +26,11 @@ namespace RogueTutorial.Systems
                     
                     if (entity.Has<Player>())
                     {
-                        System.Diagnostics.Debug.WriteLine("You are dead");
+                        log.Entries.Add("You are dead");
                     }
                     else
                     {
+                        log.Entries.Add(name.EntityName + " is dead");
                         entity.Destroy();
                     }
                 }

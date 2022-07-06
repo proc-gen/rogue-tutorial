@@ -8,7 +8,7 @@ namespace RogueTutorial
     internal class Program
     {
         const int SCREEN_WIDTH = 80;
-        const int SCREEN_HEIGHT = 25;
+        const int SCREEN_HEIGHT = 50;
         private static void Main(string[] args)
         {
             Game.Create(SCREEN_WIDTH, SCREEN_HEIGHT);
