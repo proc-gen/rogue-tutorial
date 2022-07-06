@@ -17,6 +17,14 @@ Completed:
  - Section 2.2 - Walking a Map (7/2/2022)
  - Section 2.3 - A More Interesting Map (7/2/2022)
  - Section 2.4 - Field of View (7/3/2022)
+ - Section 2.5 - Monsters (7/4/2022)
+ - Section 2.6 - Dealing Damage (7/5/2022)
+ - Section 2.7 - User Interface (7/6/2022)
 
 In Progress
- - Section 2.5 - Monsters
+ - Section 2.8 - Items and Inventory
+
+Omissions
+ - Section 2.7 - User Interface
+   - Post-Process Scanlines
+     - This feature isn't something necessary to completing the tutorial as a whole and marked as optional by the author. I may revisit this at another point in time after completing all the required parts.
