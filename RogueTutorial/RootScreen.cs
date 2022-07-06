@@ -39,32 +39,17 @@ namespace RogueTutorial
         {
             world = World.Create("My World");
             Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height);
+            Random random = new Random();
 
             world.SetData(map);
             world.SetData(RunState.PreRun);
+            world.SetData(random);
 
-            world.CreateEntity(new Position() { Point = map.Rooms.First().Center() }
-                                , new Renderable() { Glyph = new ColoredGlyph(Color.Yellow, Color.Black, '@') }
-                                , new Player()
-                                , new Viewshed() { VisibleTiles = new List<Point>(), Range = 8, Dirty = true }
-                                , new Name() { EntityName = "Player"}
-                                , new BlocksTile()
-                                , new CombatStats() { MaxHp = 30, Hp = 30, Defense = 2, Power = 5});
-
-            if (map.Rooms.Count > 1)
+            Spawner.SpawnPlayer(world, map.Rooms.First().Center());
+            
+            for (int i = 1; i < map.Rooms.Count; i++)
             {
-                Random random = new Random();
-                for (int i = 1; i < map.Rooms.Count; i++)
-                {
-                    int monsterId = random.Next(2);
-                    world.CreateEntity(new Position() { Point = map.Rooms[i].Center() }
-                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Red, Color.Black, monsterId == 1 ? 'g' : 'o')}
-                                        , new Viewshed() { VisibleTiles = new List<Point>(), Range = 8, Dirty = true }
-                                        , new Monster()
-                                        , new Name () { EntityName = (monsterId == 1 ? "Goblin" : "Orc") + " #" + i.ToString()}
-                                        , new BlocksTile()
-                                        , new CombatStats() { MaxHp = 16, Hp = 16, Defense = 1, Power = 4 });
-                }
+                Spawner.SpawnRoom(world, map.Rooms[i]);                    
             }
         }
 
