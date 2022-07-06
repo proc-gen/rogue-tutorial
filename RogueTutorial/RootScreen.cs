@@ -78,6 +78,9 @@ namespace RogueTutorial
             systems.Add(new PositionSystem(world
                                             , world.CreateQuery()
                                                 .Has<Position>()));
+            systems.Add(new ItemCollectionSystem(world
+                                                    , world.CreateQuery()
+                                                        .Has<WantsToPickupItem>()));
             systems.Add(new MeleeCombatSystem(world
                                                 , world.CreateQuery()
                                                     .Has<WantsToMelee>()));
@@ -201,6 +204,10 @@ namespace RogueTutorial
                 if (keyboard.IsKeyPressed(Keys.NumPad1) || keyboard.IsKeyPressed(Keys.B))
                 {
                     this.Surface.IsDirty = tryMovePlayer(Direction.DownLeft);
+                }
+                if (keyboard.IsKeyPressed(Keys.G))
+                {
+                    this.Surface.IsDirty = ItemCollectionSystem.GetItem(world, playerQuery.GetEntities()[0]);
                 }
 
                 if (keyboard.IsKeyPressed(Keys.Escape) || keyboard.IsKeyPressed(Keys.Q))
