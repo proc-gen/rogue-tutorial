@@ -11,6 +11,7 @@ namespace RogueTutorial.Helpers
         AwaitingInput,
         PreRun,
         PlayerTurn,
-        MonsterTurn
+        MonsterTurn,
+        ShowInventory,
     }
 }
