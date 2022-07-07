@@ -37,13 +37,17 @@ namespace RogueTutorial.UI
             drawPlayerStats(screen);
             drawGameLog(screen);
 
-            if (_world.GetData<RunState>() == RunState.ShowInventory)
+            switch (_world.GetData<RunState>())
             {
-                drawInventory(screen);
-            }
-            else
-            {
-                drawTooltips(screen, mousePosition);
+                case RunState.ShowInventory:
+                    drawInventory(screen, "Inventory");
+                    break;
+                case RunState.ShowDropItem:
+                    drawInventory(screen, "Drop Which Item?");
+                    break;
+                default:
+                    drawTooltips(screen, mousePosition);
+                    break;
             }
         }
 
@@ -88,13 +92,13 @@ namespace RogueTutorial.UI
             }
         }
 
-        private void drawInventory(ICellSurface screen)
+        private void drawInventory(ICellSurface screen, string title)
         {
             IEnumerable<Entity> inventoryItems = getInventoryItems(_player);
 
             int y = 25 - (inventoryItems.Count() / 2);
             screen.DrawRLTKStyleBox(15, y - 2, 31, inventoryItems.Count() + 3, Color.White, Color.Black);
-            screen.Print(18, y - 2, "Inventory", Color.Yellow, Color.Black);
+            screen.Print(18, y - 2, title, Color.Yellow, Color.Black);
             screen.Print(18, y + inventoryItems.Count() + 1, "ESCAPE to cancel", Color.Yellow, Color.Black);
 
             int i = 0;
@@ -131,6 +135,30 @@ namespace RogueTutorial.UI
                 if (keyboard.IsKeyPressed(keyToCheck))
                 {
                     _player.Set(new WantsToDrinkPotion() { Potion = item });
+                    _world.SetData(RunState.PlayerTurn);
+                    screen.IsDirty = true;
+                    return;
+                }
+                keyToCheck++;
+            }
+        }
+
+        public void ProcessKeyboardDropItem(Keyboard keyboard, ICellSurface screen)
+        {
+            IEnumerable<Entity> inventoryItems = getInventoryItems(_player);
+
+            if (keyboard.IsKeyPressed(Keys.Escape))
+            {
+                screen.IsDirty = true;
+                _world.SetData(RunState.AwaitingInput);
+            }
+
+            Keys keyToCheck = Keys.A;
+            foreach (Entity item in inventoryItems)
+            {
+                if (keyboard.IsKeyPressed(keyToCheck))
+                {
+                    _player.Set(new WantsToDropItem() { Item = item });
                     _world.SetData(RunState.PlayerTurn);
                     screen.IsDirty = true;
                     return;

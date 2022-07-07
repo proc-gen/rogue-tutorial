@@ -72,6 +72,9 @@ namespace RogueTutorial
             systems.Add(new PotionUseSystem(world
                                             , world.CreateQuery()
                                                 .Has<WantsToDrinkPotion>()));
+            systems.Add(new ItemDropSystem(world
+                                            , world.CreateQuery()
+                                                .Has<WantsToDropItem>()));
             systems.Add(new VisibilitySystem(world
                                                 , world.CreateQuery()
                                                     .Has<Position>()
@@ -111,6 +114,7 @@ namespace RogueTutorial
                     break;
                 case RunState.AwaitingInput:
                 case RunState.ShowInventory:
+                case RunState.ShowDropItem:
                     //Do Nothing
                     break;
                 case RunState.PlayerTurn:
@@ -181,6 +185,9 @@ namespace RogueTutorial
                     break;
                 case RunState.ShowInventory:
                     processKeyboardInventory(keyboard);
+                    break;
+                case RunState.ShowDropItem:
+                    processKeyboardDropItem(keyboard);
                     break;
             }
 
@@ -263,6 +270,11 @@ namespace RogueTutorial
             gui.ProcessKeyboardInventory(keyboard, Surface);
         }
 
+        private void processKeyboardDropItem(Keyboard keyboard)
+        {
+            gui.ProcessKeyboardInventory(keyboard, Surface);
+        }
+
         public override bool ProcessMouse(MouseScreenObjectState state)
         {
             if (state.Mouse.IsMouseOverScreenObjectSurface(this))
@@ -337,14 +349,14 @@ namespace RogueTutorial
 
         private void renderEntities(Viewshed playerVisibility)
         {
-            renderablesQuery.Foreach((ref Position position, ref Renderable renderable) =>
+            foreach(Entity entity in renderablesQuery.GetEntities().OrderBy(a => a.Get<Renderable>().RenderOrder))
             {
-                Point point = position.Point;
-                if (playerVisibility.VisibleTiles.Any(a => a.X == point.X && a.Y == point.Y))
+                Point point = entity.Get<Position>().Point;
+                if(playerVisibility.VisibleTiles.Any(a => a == point))
                 {
-                    renderable.Glyph.CopyAppearanceTo(Surface[position.Point]);
+                    entity.Get<Renderable>().Glyph.CopyAppearanceTo(Surface[point]);
                 }
-            });
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleECS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace RogueTutorial.Components
 {
-    internal class Renderable
+    internal class WantsToDropItem
     {
-        public SadConsole.ColoredGlyph Glyph { get; set; }
-        public int RenderOrder { get; set; }
+        public Entity Item { get; set; }
     }
 }
