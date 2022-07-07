@@ -63,18 +63,20 @@ namespace RogueTutorial
 
             systems = new List<ECSSystem>();
 
-            
-            systems.Add(new VisibilitySystem(world
-                                                , world.CreateQuery()
-                                                    .Has<Position>()
-                                                    .Has<Viewshed>()
-                                                , playerQuery));
             systems.Add(new MonsterSystem(world
                                             , world.CreateQuery()
                                                 .Has<Position>()
                                                 .Has<Viewshed>()
                                                 .Has<Monster>()
                                             , playerQuery));
+            systems.Add(new PotionUseSystem(world
+                                            , world.CreateQuery()
+                                                .Has<WantsToDrinkPotion>()));
+            systems.Add(new VisibilitySystem(world
+                                                , world.CreateQuery()
+                                                    .Has<Position>()
+                                                    .Has<Viewshed>()
+                                                , playerQuery));
             systems.Add(new PositionSystem(world
                                             , world.CreateQuery()
                                                 .Has<Position>()));
@@ -108,6 +110,7 @@ namespace RogueTutorial
                     world.SetData(RunState.AwaitingInput);
                     break;
                 case RunState.AwaitingInput:
+                case RunState.ShowInventory:
                     //Do Nothing
                     break;
                 case RunState.PlayerTurn:
@@ -171,57 +174,93 @@ namespace RogueTutorial
 
         public override bool ProcessKeyboard(Keyboard keyboard)
         {
-            if (world.GetData<RunState>() == RunState.AwaitingInput)
+            switch (world.GetData<RunState>())
             {
-                if (keyboard.IsKeyPressed(Keys.Left) || keyboard.IsKeyPressed(Keys.NumPad4) || keyboard.IsKeyPressed(Keys.H))
-                {
-                    this.Surface.IsDirty = tryMovePlayer(Direction.Left);
-                }
-                if (keyboard.IsKeyPressed(Keys.Right) || keyboard.IsKeyPressed(Keys.NumPad6) || keyboard.IsKeyPressed(Keys.L))
-                {
-                    this.Surface.IsDirty = tryMovePlayer(Direction.Right);
-                }
-                if (keyboard.IsKeyPressed(Keys.Up) || keyboard.IsKeyPressed(Keys.NumPad8) || keyboard.IsKeyPressed(Keys.K))
-                {
-                    this.Surface.IsDirty = tryMovePlayer(Direction.Up);
-                }
-                if (keyboard.IsKeyPressed(Keys.Down) || keyboard.IsKeyPressed(Keys.NumPad2) || keyboard.IsKeyPressed(Keys.J))
-                {
-                    this.Surface.IsDirty = tryMovePlayer(Direction.Down);
-                }
-                if (keyboard.IsKeyPressed(Keys.NumPad9) || keyboard.IsKeyPressed(Keys.Y))
-                {
-                    this.Surface.IsDirty = tryMovePlayer(Direction.UpRight);
-                }
-                if (keyboard.IsKeyPressed(Keys.NumPad7) || keyboard.IsKeyPressed(Keys.U))
-                {
-                    this.Surface.IsDirty = tryMovePlayer(Direction.UpLeft);
-                }
-                if (keyboard.IsKeyPressed(Keys.NumPad3) || keyboard.IsKeyPressed(Keys.N))
-                {
-                    this.Surface.IsDirty = tryMovePlayer(Direction.DownRight);
-                }
-                if (keyboard.IsKeyPressed(Keys.NumPad1) || keyboard.IsKeyPressed(Keys.B))
-                {
-                    this.Surface.IsDirty = tryMovePlayer(Direction.DownLeft);
-                }
-                if (keyboard.IsKeyPressed(Keys.G))
-                {
-                    this.Surface.IsDirty = ItemCollectionSystem.GetItem(world, playerQuery.GetEntities()[0]);
-                }
-
-                if (keyboard.IsKeyPressed(Keys.Escape) || keyboard.IsKeyPressed(Keys.Q))
-                {
-                    Game.Instance.MonoGameInstance.Exit();
-                }
-
-                if (this.Surface.IsDirty)
-                {
-                    world.SetData(RunState.PlayerTurn);
-                }
+                case RunState.AwaitingInput:
+                    processKeyboardMain(keyboard);
+                    break;
+                case RunState.ShowInventory:
+                    processKeyboardInventory(keyboard);
+                    break;
             }
 
             return true;
+        }
+
+        private void processKeyboardMain(Keyboard keyboard)
+        {
+            if (keyboard.IsKeyPressed(Keys.Left) || keyboard.IsKeyPressed(Keys.NumPad4) || keyboard.IsKeyPressed(Keys.H))
+            {
+                Surface.IsDirty = tryMovePlayer(Direction.Left);
+                world.SetData(RunState.PlayerTurn);
+            }
+            if (keyboard.IsKeyPressed(Keys.Right) || keyboard.IsKeyPressed(Keys.NumPad6) || keyboard.IsKeyPressed(Keys.L))
+            {
+                Surface.IsDirty = tryMovePlayer(Direction.Right);
+                world.SetData(RunState.PlayerTurn);
+            }
+            if (keyboard.IsKeyPressed(Keys.Up) || keyboard.IsKeyPressed(Keys.NumPad8) || keyboard.IsKeyPressed(Keys.K))
+            {
+                Surface.IsDirty = tryMovePlayer(Direction.Up);
+                world.SetData(RunState.PlayerTurn);
+            }
+            if (keyboard.IsKeyPressed(Keys.Down) || keyboard.IsKeyPressed(Keys.NumPad2) || keyboard.IsKeyPressed(Keys.J))
+            {
+                Surface.IsDirty = tryMovePlayer(Direction.Down);
+                world.SetData(RunState.PlayerTurn);
+            }
+            if (keyboard.IsKeyPressed(Keys.NumPad9) || keyboard.IsKeyPressed(Keys.Y))
+            {
+                Surface.IsDirty = tryMovePlayer(Direction.UpRight);
+                world.SetData(RunState.PlayerTurn);
+            }
+            if (keyboard.IsKeyPressed(Keys.NumPad7) || keyboard.IsKeyPressed(Keys.U))
+            {
+                Surface.IsDirty = tryMovePlayer(Direction.UpLeft);
+                world.SetData(RunState.PlayerTurn);
+            }
+            if (keyboard.IsKeyPressed(Keys.NumPad3) || keyboard.IsKeyPressed(Keys.N))
+            {
+                Surface.IsDirty = tryMovePlayer(Direction.DownRight);
+                world.SetData(RunState.PlayerTurn);
+            }
+            if (keyboard.IsKeyPressed(Keys.NumPad1) || keyboard.IsKeyPressed(Keys.B))
+            {
+                Surface.IsDirty = tryMovePlayer(Direction.DownLeft);
+                world.SetData(RunState.PlayerTurn);
+            }
+
+            if (keyboard.IsKeyPressed(Keys.G))
+            {
+                switch(ItemCollectionSystem.GetItem(world, playerQuery.GetEntities()[0]))
+                {
+                    case 0:
+                        //Do nothing
+                        break;
+                    case 1:
+                        Surface.IsDirty = true;
+                        world.SetData(RunState.PlayerTurn);
+                        break;
+                    case 2:
+                        Surface.IsDirty = true;
+                        break;
+                }
+            }
+            if (keyboard.IsKeyPressed(Keys.I))
+            {
+                Surface.IsDirty = true;
+                world.SetData(RunState.ShowInventory);
+            }
+
+            if (keyboard.IsKeyPressed(Keys.Escape) || keyboard.IsKeyPressed(Keys.Q))
+            {
+                Game.Instance.MonoGameInstance.Exit();
+            }
+        }
+
+        private void processKeyboardInventory(Keyboard keyboard)
+        {
+            gui.ProcessKeyboardInventory(keyboard, Surface);
         }
 
         public override bool ProcessMouse(MouseScreenObjectState state)

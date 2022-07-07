@@ -32,9 +32,9 @@ namespace RogueTutorial.Systems
             });
         }
 
-        public static bool GetItem(World world, Entity collector)
+        public static int GetItem(World world, Entity collector)
         {
-            bool needScreenRefresh = false;
+            int status = 0;
             Position collectorPosition = collector.Get<Position>();
             IEnumerable<Entity> items = world.CreateQuery()
                                 .Has<Item>().GetEntities()
@@ -43,15 +43,15 @@ namespace RogueTutorial.Systems
             if(items.Any())
             {
                 collector.Set(new WantsToPickupItem() { CollectedBy = collector, Item = items.First()});
-                needScreenRefresh = true;
+                status = 1;
             }
             else if(collector.Has<Player>())
             {
                 world.GetData<GameLog>().Entries.Add("There is nothing here to pick up.");
-                needScreenRefresh = true;
+                status = 2;
             }
 
-            return needScreenRefresh;
+            return status;
         }
     }
 }

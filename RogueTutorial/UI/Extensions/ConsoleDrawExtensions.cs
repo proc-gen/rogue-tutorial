@@ -11,8 +11,13 @@ namespace RogueTutorial.UI.Extensions
 {
     public static class ConsoleDrawExtensions
     {
-        public static void DrawRLTKStyleBox(this ICellSurface screen, int x, int y, int width, int height, Color foreground, Color background)
+        public static void DrawRLTKStyleBox(this ICellSurface screen, int x, int y, int width, int height, Color foreground, Color background, bool filled = true)
         {
+            if (filled)
+            {
+                screen.Fill(new Rectangle(x, y, width, height), Color.White, Color.Black, 0);
+            }
+
             //Horizontal Lines
             screen.DrawLine(new Point(x + 1, y), new Point(x + width - 1, y), 196, foreground, background);
             screen.DrawLine(new Point(x + 1, y + height), new Point(x + width - 1, y + height), 196, foreground, background);
