@@ -18,7 +18,7 @@ namespace RogueTutorial.Map
         public static Entity SpawnPlayer(World world, Point playerStart)
         {
             return world.CreateEntity(new Position() { Point =  playerStart}
-                                , new Renderable() { Glyph = new ColoredGlyph(Color.Yellow, Color.Black, '@') }
+                                , new Renderable() { Glyph = new ColoredGlyph(Color.Yellow, Color.Black, '@'), RenderOrder = 0 }
                                 , new Player()
                                 , new Viewshed() { VisibleTiles = new List<Point>(), Range = 8, Dirty = true }
                                 , new Name() { EntityName = "Player" }
@@ -118,7 +118,7 @@ namespace RogueTutorial.Map
         private static Entity spawnMonster(World world, Point start, string name, char tile)
         {
             return world.CreateEntity(new Position() { Point = start }
-                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Red, Color.Black, tile) }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Red, Color.Black, tile), RenderOrder = 1 }
                                         , new Viewshed() { VisibleTiles = new List<Point>(), Range = 8, Dirty = true }
                                         , new Monster()
                                         , new Name() { EntityName = name }
@@ -129,7 +129,7 @@ namespace RogueTutorial.Map
         private static Entity spawnHealthPotion(World world, Point start)
         {
             return world.CreateEntity(new Position() { Point = start }
-                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Magenta, Color.Black, 173) }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Magenta, Color.Black, 173), RenderOrder = 2 }
                                         , new Name() { EntityName = "Health Potion" }
                                         , new Item()
                                         , new Potion() { HealAmount = 8 });

@@ -13,5 +13,6 @@ namespace RogueTutorial.Helpers
         PlayerTurn,
         MonsterTurn,
         ShowInventory,
+        ShowDropItem,
     }
 }
