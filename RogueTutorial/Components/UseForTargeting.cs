@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace RogueTutorial.Components
 {
-    internal class WantsToDrinkPotion
+    internal class UseForTargeting
     {
-        public Entity Potion { get; set; }
+        public Entity Item { get; set; }
     }
 }

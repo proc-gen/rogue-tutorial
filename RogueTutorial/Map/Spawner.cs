@@ -86,7 +86,7 @@ namespace RogueTutorial.Map
 
             foreach (Point spawnPoint in spawnPoints)
             {
-                spawnHealthPotion(world, spawnPoint);
+                SpawnItem(world, spawnPoint);
             }
         }
 
@@ -125,15 +125,42 @@ namespace RogueTutorial.Map
                                         , new BlocksTile()
                                         , new CombatStats() { MaxHp = 16, Hp = 16, Defense = 1, Power = 4 });
         }
-    
+
+        public static Entity SpawnItem(World world, Point start)
+        {
+            Random random = world.GetData<Random>();
+
+            switch (random.Next(2))
+            {
+                case 0:
+                    return spawnHealthPotion(world, start);
+                    break;
+                default:
+                    return spawnMagicMissileScroll(world, start);
+                    break;
+            }
+        }
+
         private static Entity spawnHealthPotion(World world, Point start)
         {
             return world.CreateEntity(new Position() { Point = start }
                                         , new Renderable() { Glyph = new ColoredGlyph(Color.Magenta, Color.Black, 173), RenderOrder = 2 }
                                         , new Name() { EntityName = "Health Potion" }
                                         , new Item()
-                                        , new Potion() { HealAmount = 8 });
+                                        , new Consumable()
+                                        , new ProvidesHealing() { HealAmount = 8 });
                         
+        }
+
+        private static Entity spawnMagicMissileScroll(World world, Point start)
+        {
+            return world.CreateEntity(new Position() { Point = start }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Cyan, Color.Black, ')'), RenderOrder = 2 }
+                                        , new Name() { EntityName = "Magic Missile Scroll" }
+                                        , new Item()
+                                        , new Consumable()
+                                        , new Ranged() { Range = 6 }
+                                        , new InflictsDamage() { Damage = 8});
         }
     
     }
