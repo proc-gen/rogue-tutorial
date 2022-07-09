@@ -69,9 +69,12 @@ namespace RogueTutorial
                                                 .Has<Viewshed>()
                                                 .Has<Monster>()
                                             , playerQuery));
-            systems.Add(new PotionUseSystem(world
+            systems.Add(new ItemUseSystem(world
                                             , world.CreateQuery()
-                                                .Has<WantsToDrinkPotion>()));
+                                                .Has<WantsToUseItem>()));
+            systems.Add(new ItemConsumedSystem(world
+                                            , world.CreateQuery()
+                                                .Has<WantsToUseItem>()));
             systems.Add(new ItemDropSystem(world
                                             , world.CreateQuery()
                                                 .Has<WantsToDropItem>()));
@@ -115,15 +118,20 @@ namespace RogueTutorial
                 case RunState.AwaitingInput:
                 case RunState.ShowInventory:
                 case RunState.ShowDropItem:
+                case RunState.ShowTargeting:
                     //Do Nothing
                     break;
                 case RunState.PlayerTurn:
                     runSystems(delta);
-                    world.SetData(RunState.MonsterTurn);
+                    if (world.GetData<RunState>() == RunState.PlayerTurn)
+                    {
+                        world.SetData(RunState.MonsterTurn);
+                    }
                     break;
                 case RunState.MonsterTurn:
                     runSystems(delta);
                     world.SetData(RunState.AwaitingInput);
+                    Surface.IsDirty = true;
                     break;
             }
 
@@ -188,6 +196,9 @@ namespace RogueTutorial
                     break;
                 case RunState.ShowDropItem:
                     processKeyboardDropItem(keyboard);
+                    break;
+                case RunState.ShowTargeting:
+                    processKeyboardTargetingSystem(keyboard);
                     break;
             }
 
@@ -275,6 +286,11 @@ namespace RogueTutorial
             gui.ProcessKeyboardInventory(keyboard, Surface);
         }
 
+        private void processKeyboardTargetingSystem(Keyboard keyboard)
+        {
+            gui.ProcessKeyboardTargetingSystem(keyboard, Surface);
+        }
+
         public override bool ProcessMouse(MouseScreenObjectState state)
         {
             if (state.Mouse.IsMouseOverScreenObjectSurface(this))
@@ -283,6 +299,11 @@ namespace RogueTutorial
                 {
                     mousePosition = state.CellPosition;
                     Surface.IsDirty = true;
+                }
+
+                if(world.GetData<RunState>() == RunState.ShowTargeting)
+                {
+                    gui.ProcessMouseTargetingSystem(state);
                 }
             }
             else

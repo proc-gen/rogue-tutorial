@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RogueTutorial.Components
 {
-    internal class Potion
+    internal class ProvidesHealing
     {
         public int HealAmount { get; set; }
     }

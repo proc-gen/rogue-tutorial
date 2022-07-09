@@ -20,6 +20,7 @@ namespace RogueTutorial.UI
         private Entity _player;
         private Query _tooltipQuery;
         private Query _inventoryQuery;
+        private Query _itemForTargetQuery;
         public Gui(World world, Query playerQuery)
         {
             _world = world;
@@ -29,6 +30,8 @@ namespace RogueTutorial.UI
                                 .Has<Name>();
             _inventoryQuery = world.CreateQuery()
                                 .Has<InBackpack>();
+            _itemForTargetQuery = world.CreateQuery()
+                                   .Has<UseForTargeting>();
         }
 
         public void Render(ICellSurface screen, Point? mousePosition)
@@ -44,6 +47,9 @@ namespace RogueTutorial.UI
                     break;
                 case RunState.ShowDropItem:
                     drawInventory(screen, "Drop Which Item?");
+                    break;
+                case RunState.ShowTargeting:
+                    drawTargetingSystem(screen, mousePosition);
                     break;
                 default:
                     drawTooltips(screen, mousePosition);
@@ -92,6 +98,27 @@ namespace RogueTutorial.UI
             }
         }
 
+        private void drawTargetingSystem(ICellSurface screen, Point? mousePosition)
+        {
+            Entity forTargeting = _itemForTargetQuery.GetEntities()[0].Get<UseForTargeting>().Item;
+            Ranged targetRange = forTargeting.Get<Ranged>();
+
+            screen.Print(5, 0, "Select Target for " + forTargeting.Get<Name>().EntityName, Color.Yellow, Color.Black);
+
+            if (mousePosition.HasValue)
+            {
+                if (_player.Get<Viewshed>().VisibleTiles.Any(a => a == mousePosition.Value)
+                        && Point.EuclideanDistanceMagnitude(_player.Get<Position>().Point, mousePosition.Value) <= (targetRange.Range * targetRange.Range))
+                {
+                    screen.SetGlyph(mousePosition.Value.X, mousePosition.Value.Y, 176, Color.Blue);
+                }
+                else
+                {
+                    screen.SetGlyph(mousePosition.Value.X, mousePosition.Value.Y, 176, Color.Red);
+                }
+            }
+        }
+
         private void drawInventory(ICellSurface screen, string title)
         {
             IEnumerable<Entity> inventoryItems = getInventoryItems(_player);
@@ -134,7 +161,7 @@ namespace RogueTutorial.UI
             {
                 if (keyboard.IsKeyPressed(keyToCheck))
                 {
-                    _player.Set(new WantsToDrinkPotion() { Potion = item });
+                    _player.Set(new WantsToUseItem() { Item = item });
                     _world.SetData(RunState.PlayerTurn);
                     screen.IsDirty = true;
                     return;
@@ -166,5 +193,33 @@ namespace RogueTutorial.UI
                 keyToCheck++;
             }
         }
+
+        public void ProcessKeyboardTargetingSystem(Keyboard keyboard, ICellSurface screen)
+        {
+            if (keyboard.IsKeyPressed(Keys.Escape))
+            {
+                _player.Remove<WantsToUseItem>();
+                screen.IsDirty = true;
+                _world.SetData(RunState.AwaitingInput);
+            }
+        }
+    
+        public void ProcessMouseTargetingSystem(MouseScreenObjectState state)
+        {
+            if (state.Mouse.LeftClicked)
+            {
+                Entity forTargeting = _itemForTargetQuery.GetEntities()[0].Get<UseForTargeting>().Item;
+                Ranged targetRange = forTargeting.Get<Ranged>();
+
+                if (_player.Get<Viewshed>().VisibleTiles.Any(a => a == state.CellPosition)
+                            && Point.EuclideanDistanceMagnitude(_player.Get<Position>().Point, state.CellPosition) <= (targetRange.Range * targetRange.Range))
+                {
+                    WantsToUseItem wantsUse = _player.Get<WantsToUseItem>();
+                    wantsUse.Target = state.CellPosition;
+                    _world.SetData(RunState.PlayerTurn);
+                }
+            }
+        }
     }
+
 }
