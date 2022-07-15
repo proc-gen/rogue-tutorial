@@ -13,7 +13,7 @@ namespace RogueTutorial.Map
     internal class Spawner
     {
         const int MAX_MONSTERS = 4;
-        const int MAX_ITEMS = 2;
+        const int MAX_ITEMS = 20;
 
         public static Entity SpawnPlayer(World world, Point playerStart)
         {
@@ -130,14 +130,16 @@ namespace RogueTutorial.Map
         {
             Random random = world.GetData<Random>();
 
-            switch (random.Next(2))
+            switch (random.Next(3))
             {
                 case 0:
                     return spawnHealthPotion(world, start);
                     break;
-                default:
+                case 1:
                     return spawnMagicMissileScroll(world, start);
                     break;
+                default:
+                    return spawnFireballScroll(world, start);
             }
         }
 
@@ -161,6 +163,18 @@ namespace RogueTutorial.Map
                                         , new Consumable()
                                         , new Ranged() { Range = 6 }
                                         , new InflictsDamage() { Damage = 8});
+        }
+
+        private static Entity spawnFireballScroll(World world, Point start)
+        {
+            return world.CreateEntity(new Position() { Point = start }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Orange, Color.Black, ')'), RenderOrder = 2 }
+                                        , new Name() { EntityName = "Fireball Scroll" }
+                                        , new Item()
+                                        , new Consumable()
+                                        , new Ranged() { Range = 6 }
+                                        , new InflictsDamage() { Damage = 20 }
+                                        , new AreaOfEffect() { Radius = 3 });
         }
     
     }

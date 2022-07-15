@@ -102,6 +102,7 @@ namespace RogueTutorial.UI
         {
             Entity forTargeting = _itemForTargetQuery.GetEntities()[0].Get<UseForTargeting>().Item;
             Ranged targetRange = forTargeting.Get<Ranged>();
+            
 
             screen.Print(5, 0, "Select Target for " + forTargeting.Get<Name>().EntityName, Color.Yellow, Color.Black);
 
@@ -110,7 +111,17 @@ namespace RogueTutorial.UI
                 if (_player.Get<Viewshed>().VisibleTiles.Any(a => a == mousePosition.Value)
                         && Point.EuclideanDistanceMagnitude(_player.Get<Position>().Point, mousePosition.Value) <= (targetRange.Range * targetRange.Range))
                 {
-                    screen.SetGlyph(mousePosition.Value.X, mousePosition.Value.Y, 176, Color.Blue);
+                    AreaOfEffect aoe = null;
+                    if(forTargeting.TryGet(out aoe))
+                    {
+                        List<Point> targetCells = new List<Point>();
+                        targetCells.AddRange(_world.GetData<Map.Map>().ComputeFOV(mousePosition.Value.X, mousePosition.Value.Y, aoe.Radius, false, false));
+                        foreach(Point targetCell in targetCells)
+                        {
+                            screen.SetGlyph(targetCell.X, targetCell.Y, 176, Color.Blue);
+                        }
+                    }
+                    screen.SetGlyph(mousePosition.Value.X, mousePosition.Value.Y, 176, Color.Cyan);
                 }
                 else
                 {
@@ -210,7 +221,7 @@ namespace RogueTutorial.UI
             {
                 Entity forTargeting = _itemForTargetQuery.GetEntities()[0].Get<UseForTargeting>().Item;
                 Ranged targetRange = forTargeting.Get<Ranged>();
-
+                
                 if (_player.Get<Viewshed>().VisibleTiles.Any(a => a == state.CellPosition)
                             && Point.EuclideanDistanceMagnitude(_player.Get<Position>().Point, state.CellPosition) <= (targetRange.Range * targetRange.Range))
                 {
