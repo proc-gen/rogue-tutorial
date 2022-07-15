@@ -20,7 +20,7 @@ namespace RogueTutorial.Systems
 
         public override void Run(TimeSpan delta)
         {
-            query.Foreach((in GameLog log, Entity entity, ref WantsToUseItem wantsUse, ref Name name, ref CombatStats stats) =>
+            query.Foreach((in GameLog log, in Map.Map map, Entity entity, ref WantsToUseItem wantsUse, ref Name name, ref CombatStats stats) =>
             {
                 if (wantsUse.Item.Has<ProvidesHealing>())
                 {
@@ -29,7 +29,7 @@ namespace RogueTutorial.Systems
 
                     if (entity.Has<Player>())
                     {
-                        log.Entries.Add("You drink the " + wantsUse.Item.Get<Name>().EntityName + ", healing " + healer.HealAmount + " hp.");
+                        log.Entries.Add("You use the " + wantsUse.Item.Get<Name>().EntityName + ", healing " + healer.HealAmount + " hp.");
                     }
 
                     if (wantsUse.Item.Has<Consumable>())
@@ -41,8 +41,16 @@ namespace RogueTutorial.Systems
                 {
                     if (wantsUse.Target.HasValue)
                     {
-                        Point targetCell = wantsUse.Target.Value;
-                        IEnumerable<Entity> targets = world.CreateQuery().Has<Position>().Has<CombatStats>().GetEntities().Where(a => a.Get<Position>().Point == targetCell);
+                        List<Point> targetCells = new List<Point>();
+                        if (wantsUse.Item.Has<AreaOfEffect>())
+                        {
+                            targetCells.AddRange(map.ComputeFOV(wantsUse.Target.Value.X, wantsUse.Target.Value.Y, wantsUse.Item.Get<AreaOfEffect>().Radius, false, false));
+                        }
+                        else
+                        {
+                            targetCells.Add(wantsUse.Target.Value);
+                        }
+                        IEnumerable<Entity> targets = world.CreateQuery().Has<Position>().Has<CombatStats>().GetEntities().Where(a => targetCells.Contains(a.Get<Position>().Point));
 
                         if (targets.Any())
                         {
@@ -52,18 +60,21 @@ namespace RogueTutorial.Systems
                                 nameToUse = "You use ";
                             }
 
-                            InflictsDamage inflicts = wantsUse.Item.Get<InflictsDamage>();
-                            foreach(Entity target in targets)
+                            if (wantsUse.Item.Has<InflictsDamage>())
                             {
-                                SufferDamage targetDamage = null;
-                                if (!target.TryGet(out targetDamage))
+                                InflictsDamage inflicts = wantsUse.Item.Get<InflictsDamage>();
+                                foreach (Entity target in targets)
                                 {
-                                    targetDamage = new SufferDamage();
-                                }
-                                targetDamage.NewDamage(inflicts.Damage);
-                                target.Set(targetDamage);
+                                    SufferDamage targetDamage = null;
+                                    if (!target.TryGet(out targetDamage))
+                                    {
+                                        targetDamage = new SufferDamage();
+                                    }
+                                    targetDamage.NewDamage(inflicts.Damage);
+                                    target.Set(targetDamage);
 
-                                log.Entries.Add(nameToUse + wantsUse.Item.Get<Name>().EntityName + " on " + target.Get<Name>().EntityName + ", inflicting " + inflicts.Damage + " hp");
+                                    log.Entries.Add(nameToUse + wantsUse.Item.Get<Name>().EntityName + " on " + target.Get<Name>().EntityName + ", inflicting " + inflicts.Damage + " hp");
+                                }
                             }
                         }
 
