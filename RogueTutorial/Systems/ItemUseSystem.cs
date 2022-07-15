@@ -76,6 +76,23 @@ namespace RogueTutorial.Systems
                                     log.Entries.Add(nameToUse + wantsUse.Item.Get<Name>().EntityName + " on " + target.Get<Name>().EntityName + ", inflicting " + inflicts.Damage + " hp");
                                 }
                             }
+
+                            if (wantsUse.Item.Has<Confusion>())
+                            {
+                                Confusion confusion = wantsUse.Item.Get<Confusion>();
+                                foreach(Entity target in targets)
+                                {
+                                    Confusion targetConfusion = null;
+                                    if (!target.TryGet(out targetConfusion))
+                                    {
+                                        targetConfusion = new Confusion();
+                                    }
+                                    targetConfusion.Turns = confusion.Turns;
+                                    target.Set(targetConfusion);
+
+                                    log.Entries.Add(nameToUse + wantsUse.Item.Get<Name>().EntityName + " on " + target.Get<Name>().EntityName + ", confusing them");
+                                }
+                            }
                         }
 
                         if (wantsUse.Item.Has<Consumable>())

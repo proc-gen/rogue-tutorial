@@ -13,7 +13,7 @@ namespace RogueTutorial.Map
     internal class Spawner
     {
         const int MAX_MONSTERS = 4;
-        const int MAX_ITEMS = 20;
+        const int MAX_ITEMS = 2;
 
         public static Entity SpawnPlayer(World world, Point playerStart)
         {
@@ -130,13 +130,16 @@ namespace RogueTutorial.Map
         {
             Random random = world.GetData<Random>();
 
-            switch (random.Next(3))
+            switch (random.Next(4))
             {
                 case 0:
                     return spawnHealthPotion(world, start);
                     break;
                 case 1:
                     return spawnMagicMissileScroll(world, start);
+                    break;
+                case 2:
+                    return spawnConfusionScroll(world, start);
                     break;
                 default:
                     return spawnFireballScroll(world, start);
@@ -176,6 +179,17 @@ namespace RogueTutorial.Map
                                         , new InflictsDamage() { Damage = 20 }
                                         , new AreaOfEffect() { Radius = 3 });
         }
-    
+
+        private static Entity spawnConfusionScroll(World world, Point start)
+        {
+            return world.CreateEntity(new Position() { Point = start }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Pink, Color.Black, ')'), RenderOrder = 2 }
+                                        , new Name() { EntityName = "Confusion Scroll" }
+                                        , new Item()
+                                        , new Consumable()
+                                        , new Ranged() { Range = 6 }
+                                        , new Confusion() { Turns = 4 });
+        }
+
     }
 }

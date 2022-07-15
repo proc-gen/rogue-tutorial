@@ -33,27 +33,45 @@ namespace RogueTutorial.Systems
             {
                 query.Foreach((in Map.Map map, Entity entity, ref Position position, ref Viewshed visibility, ref Name name) =>
                 {
-                    if (visibility.VisibleTiles.Contains(playerPosition.Point))
+                    bool canAct = true;
+                    if (entity.Has<Confusion>())
                     {
-                        if (Point.EuclideanDistanceMagnitude(playerPosition.Point, position.Point) <= 2.0)
+                        canAct = false;
+                        Confusion confusion = entity.Get<Confusion>();
+                        if(confusion.Turns == 1)
                         {
-                            entity.Set(new WantsToMelee() { Target = player });
+                            entity.Remove<Confusion>();
                         }
                         else
                         {
-                            Path path = map.FindPath(position.Point, playerPosition.Point);
-                            if (path != null && path.Steps.ElementAtOrDefault(1) != null)
+                            confusion.Turns--;
+                            entity.Set(confusion);
+                        }
+                    }
+                    if (canAct)
+                    {
+                        if (visibility.VisibleTiles.Contains(playerPosition.Point))
+                        {
+                            if (Point.EuclideanDistanceMagnitude(playerPosition.Point, position.Point) <= 2.0)
                             {
-                                if (path.Steps.Count() > 2)
+                                entity.Set(new WantsToMelee() { Target = player });
+                            }
+                            else
+                            {
+                                Path path = map.FindPath(position.Point, playerPosition.Point);
+                                if (path != null && path.Steps.ElementAtOrDefault(1) != null)
                                 {
-                                    ICell nextCell = path.Steps.ElementAt(1);
-                                    if (map.IsCellWalkable(nextCell.X, nextCell.Y))
+                                    if (path.Steps.Count() > 2)
                                     {
-                                        position.Point = new Point(nextCell.X, nextCell.Y);
-                                        visibility.Dirty = true;
-                                        map.SetCellWalkable(position.PreviousPoint.X, position.PreviousPoint.Y, true);
-                                        map.SetCellWalkable(position.Point.X, position.Point.Y, false);
-                                        position.Dirty = false;
+                                        ICell nextCell = path.Steps.ElementAt(1);
+                                        if (map.IsCellWalkable(nextCell.X, nextCell.Y))
+                                        {
+                                            position.Point = new Point(nextCell.X, nextCell.Y);
+                                            visibility.Dirty = true;
+                                            map.SetCellWalkable(position.PreviousPoint.X, position.PreviousPoint.Y, true);
+                                            map.SetCellWalkable(position.Point.X, position.Point.Y, false);
+                                            position.Dirty = false;
+                                        }
                                     }
                                 }
                             }
