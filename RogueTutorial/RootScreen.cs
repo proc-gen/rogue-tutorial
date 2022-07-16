@@ -21,35 +21,48 @@ namespace RogueTutorial
         World world;
         Query renderablesQuery;
         Query playerQuery;
-        Gui gui;
-        List<Systems.ECSSystem> systems;
+        GameGui gameGui;
+        MenuGui menuGui;
+        List<ECSSystem> systems;
 
         Point? mousePosition;
 
         public RootScreen(int width, int height)
             : base(width, height)
         {
-            createWorld(width, height - 10);
+            createWorld();
             initializeSystems();
-            initializeGui();
+            initializeGuis();
             this.Surface.IsDirty = true;
         }
 
-        private void createWorld(int width, int height)
+        private void createWorld()
         {
             world = World.Create("My World");
+            world.SetData(RunState.MainMenu);            
+        }
+
+        private void startNewGame(int width, int height)
+        {
+            if(world.EntityCount > 0)
+            {
+                foreach(Entity entity in world.GetEntities())
+                {
+                    entity.Destroy();
+                }
+            }
+
             Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height);
             Random random = new Random();
 
             world.SetData(map);
-            world.SetData(RunState.PreRun);
             world.SetData(random);
 
             Spawner.SpawnPlayer(world, map.Rooms.First().Center());
-            
+
             for (int i = 1; i < map.Rooms.Count; i++)
             {
-                Spawner.SpawnRoom(world, map.Rooms[i]);                    
+                Spawner.SpawnRoom(world, map.Rooms[i]);
             }
         }
 
@@ -101,9 +114,10 @@ namespace RogueTutorial
             
         }
 
-        private void initializeGui()
+        private void initializeGuis()
         {
-            gui = new Gui(world, playerQuery);
+            gameGui = new GameGui(world, playerQuery);
+            menuGui = new MenuGui(world);
             world.SetData(new GameLog() { Entries = new List<string>() { "Welcome to Rusty Roguelike" } });
         }
 
@@ -112,6 +126,7 @@ namespace RogueTutorial
             switch (world.GetData<RunState>())
             {
                 case RunState.PreRun:
+                    startNewGame(Width, Height - 10);
                     runSystems(delta);
                     world.SetData(RunState.AwaitingInput);
                     break;
@@ -141,7 +156,7 @@ namespace RogueTutorial
 
         private void runSystems(TimeSpan delta)
         {
-            foreach (Systems.ECSSystem system in systems)
+            foreach (ECSSystem system in systems)
             {
                 system.Run(delta);
             }
@@ -199,6 +214,9 @@ namespace RogueTutorial
                     break;
                 case RunState.ShowTargeting:
                     processKeyboardTargetingSystem(keyboard);
+                    break;
+                case RunState.MainMenu:
+                    processKeyboardMainMenu(keyboard);
                     break;
             }
 
@@ -272,23 +290,29 @@ namespace RogueTutorial
 
             if (keyboard.IsKeyPressed(Keys.Escape) || keyboard.IsKeyPressed(Keys.Q))
             {
-                Game.Instance.MonoGameInstance.Exit();
+                Surface.IsDirty = true;
+                world.SetData(RunState.MainMenu);
             }
         }
 
         private void processKeyboardInventory(Keyboard keyboard)
         {
-            gui.ProcessKeyboardInventory(keyboard, Surface);
+            gameGui.ProcessKeyboardInventory(keyboard, Surface);
         }
 
         private void processKeyboardDropItem(Keyboard keyboard)
         {
-            gui.ProcessKeyboardInventory(keyboard, Surface);
+            gameGui.ProcessKeyboardInventory(keyboard, Surface);
         }
 
         private void processKeyboardTargetingSystem(Keyboard keyboard)
         {
-            gui.ProcessKeyboardTargetingSystem(keyboard, Surface);
+            gameGui.ProcessKeyboardTargetingSystem(keyboard, Surface);
+        }
+
+        private void processKeyboardMainMenu(Keyboard keyboard)
+        {
+            menuGui.ProcessKeyboard(keyboard, Surface);
         }
 
         public override bool ProcessMouse(MouseScreenObjectState state)
@@ -303,7 +327,7 @@ namespace RogueTutorial
 
                 if(world.GetData<RunState>() == RunState.ShowTargeting)
                 {
-                    gui.ProcessMouseTargetingSystem(state);
+                    gameGui.ProcessMouseTargetingSystem(state);
                 }
             }
             else
@@ -322,14 +346,21 @@ namespace RogueTutorial
             if (Surface.IsDirty)
             {
                 Surface.Clear();
-                Map.Map map = world.GetData<Map.Map>();
-                Entity player = playerQuery.GetEntities()[0];
-                Viewshed playerVisibility = player.Get<Viewshed>();
+                if (world.GetData<RunState>() == RunState.MainMenu)
+                {
+                    menuGui.Render(Surface, mousePosition);
+                }
+                else
+                {
+                    Map.Map map = world.GetData<Map.Map>();
+                    Entity player = playerQuery.GetEntities()[0];
+                    Viewshed playerVisibility = player.Get<Viewshed>();
 
-                renderMap(map, playerVisibility);
-                renderEntities(playerVisibility);                
+                    renderMap(map, playerVisibility);
+                    renderEntities(playerVisibility);
 
-                gui.Render(Surface, mousePosition);
+                    gameGui.Render(Surface, mousePosition);
+                }
             }
             base.Render(delta);
         }

@@ -14,17 +14,18 @@ using SadConsole.Input;
 
 namespace RogueTutorial.UI
 {
-    internal class Gui
+    internal class GameGui
     {
         private World _world;
-        private Entity _player;
+        private Entity _player { get { return _playerQuery.GetEntities()[0]; } }
+        private Query _playerQuery;
         private Query _tooltipQuery;
         private Query _inventoryQuery;
         private Query _itemForTargetQuery;
-        public Gui(World world, Query playerQuery)
+        public GameGui(World world, Query playerQuery)
         {
             _world = world;
-            _player = playerQuery.GetEntities()[0];
+            _playerQuery = playerQuery;
             _tooltipQuery = world.CreateQuery()
                                 .Has<Position>()
                                 .Has<Name>();
