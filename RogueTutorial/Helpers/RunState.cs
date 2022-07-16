@@ -15,5 +15,6 @@ namespace RogueTutorial.Helpers
         ShowInventory,
         ShowDropItem,
         ShowTargeting,
+        MainMenu,
     }
 }
