@@ -8,13 +8,16 @@ using RogueSharp;
 
 using Point = SadRogue.Primitives.Point;
 using SimpleECS;
+using RogueTutorial.Interfaces;
+using RogueTutorial.Utils;
 
 namespace RogueTutorial.Map
 {
-    internal class Map
+    internal class Map : ISaveable
     {
         private TileType[] _mapGrid;
         private bool[] _blocked;
+        private bool[] _explored;
         private Dictionary<Point, List<Entity>> _tileContent;
 
         public int Width { get; private set; }
@@ -29,6 +32,8 @@ namespace RogueTutorial.Map
             Width = width;
             _mapGrid = new TileType[width * height];
             _blocked = new bool[width * height];
+            _explored = new bool[width * height];
+
             Rooms = new List<Rectangle>();
             map = new RogueSharp.Map(width, height);
             _tileContent = new Dictionary<Point, List<Entity>>();
@@ -66,6 +71,7 @@ namespace RogueTutorial.Map
                 foreach (var cell in cells)
                 {
                     updateCellVisibility(cell.X, cell.Y, true);
+                    _explored[cell.Y * Width + cell.X] = true;
                 }
             }
 
@@ -121,6 +127,63 @@ namespace RogueTutorial.Map
         public List<Entity> GetCellEntities(Point point)
         {
             return _tileContent.ContainsKey(point) ? _tileContent[point] : new List<Entity>();
+        }
+
+        public StringBuilder Save(StringBuilder sb, int index)
+        {
+            sb.AppendLine("Map:" + index.ToString());
+            sb.AppendLine("Width:" + Width.ToString());
+            sb.AppendLine("Height:" + Height.ToString());
+            for(int i = 0; i < Rooms.Count; i++)
+            {
+                sb = Rooms[i].Save(sb, i);
+            }
+            for(int i = 0; i < Width; i++)
+            {
+                for(int j = 0; j < Height; j++)
+                {
+                    sb.Append("Point(" + i + "," + j + "):");
+                    sb.Append(_blocked[j * Width + i].ToString() + ",");
+                    sb.Append(_explored[j * Width + i].ToString() + ",");
+                    sb.Append(_mapGrid[j * Width + i].ToString());
+                    sb.AppendLine();
+                }
+            }
+            return sb;
+        }
+
+        public void Load(List<LineData> data, int index)
+        {
+            index = loadRooms(data, index);
+            index = populateCells(data, index);
+        }
+
+        private int loadRooms(List<LineData> data, int index)
+        {
+            while (data[index].FieldName == "Rectangle")
+            {
+                Rectangle room = new Rectangle(0, 0, 0, 0);
+                room.Load(data, index);
+                Rooms.Add(room);
+                index += 5;
+            }
+
+            return index;
+        }
+
+        private int populateCells(List<LineData> data, int index)
+        {
+            do
+            {
+                Point position = SaveGameManager.GetPointFromFieldValue(data[index].FieldName.Replace("Point(", "").Replace(")", ""));
+                string[] cellData = data[index].FieldValue.Split(",");
+                _blocked[position.Y * Width + position.X] = bool.Parse(cellData[0]);
+                _explored[position.Y * Width + position.X] = bool.Parse(cellData[1]);
+                _mapGrid[position.Y * Width + position.X] = TileTypeExtensions.GetTileTypeFromString(cellData[2]);
+                map.SetCellProperties(position.X, position.Y, !_blocked[position.Y * Width + position.X], !_blocked[position.Y * Width + position.X], _explored[position.Y * Width + position.X]);
+                index++;
+            }while(index < data.Count);
+            return index;
         }
     }
 }

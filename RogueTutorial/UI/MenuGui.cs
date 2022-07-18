@@ -11,6 +11,7 @@ using SadRogue.Primitives;
 
 using RogueTutorial.Helpers;
 using RogueTutorial.UI.Extensions;
+using System.IO;
 
 namespace RogueTutorial.UI
 {
@@ -40,8 +41,11 @@ namespace RogueTutorial.UI
                 optionPosition++;
             }
 
-            printMenuOption(screen, screen.Width / 2 - 4, optionPosition, "Load Game", MenuState.LoadGame);
-            optionPosition++;
+            if (showLoad())
+            {
+                printMenuOption(screen, screen.Width / 2 - 4, optionPosition, "Load Game", MenuState.LoadGame);
+                optionPosition++;
+            }
 
             printMenuOption(screen, screen.Width / 2 - 4, optionPosition, "Quit Game", MenuState.Quit);
             optionPosition++;
@@ -64,6 +68,11 @@ namespace RogueTutorial.UI
             return _world.EntityCount > 0;
         }
 
+        private bool showLoad()
+        {
+            return File.Exists("savegame.txt");
+        }
+
         public void ProcessKeyboard(Keyboard keyboard, ICellSurface screen)
         {
             if (keyboard.IsKeyPressed(Keys.Up) || keyboard.IsKeyPressed(Keys.NumPad8) || keyboard.IsKeyPressed(Keys.K))
@@ -78,7 +87,11 @@ namespace RogueTutorial.UI
                         _menuState = showContinue() ? MenuState.ContinueGame : MenuState.NewGame;
                         break;
                     case MenuState.Quit:
-                        _menuState = MenuState.LoadGame;
+                        _menuState = showLoad() ?
+                                        MenuState.LoadGame :
+                                        showContinue() ?
+                                            MenuState.ContinueGame :
+                                            MenuState.NewGame;
                         break;
                 }
             }
@@ -88,10 +101,16 @@ namespace RogueTutorial.UI
                 switch (_menuState)
                 {
                     case MenuState.NewGame:
-                        _menuState = showContinue() ? MenuState.ContinueGame : MenuState.LoadGame;
+                        _menuState = showContinue() ? 
+                                        MenuState.ContinueGame : 
+                                        showLoad() ? 
+                                            MenuState.LoadGame : 
+                                            MenuState.Quit;
                         break;
                     case MenuState.ContinueGame:
-                        _menuState = MenuState.LoadGame;
+                        _menuState = showLoad() ?
+                                        MenuState.LoadGame :
+                                        MenuState.Quit;
                         break;
                     case MenuState.LoadGame:
                         _menuState = MenuState.Quit;
@@ -111,7 +130,7 @@ namespace RogueTutorial.UI
                         _world.SetData(RunState.AwaitingInput);
                         break;
                     case MenuState.LoadGame:
-                        _world.SetData(RunState.PreRun);
+                        _world.SetData(RunState.LoadGame);
                         break;
                     case MenuState.Quit:
                         Game.Instance.MonoGameInstance.Exit();

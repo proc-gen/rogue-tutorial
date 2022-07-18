@@ -13,6 +13,9 @@ using RogueTutorial.Systems;
 using RogueTutorial.Map;
 using RogueTutorial.Helpers;
 using RogueTutorial.UI;
+using RogueTutorial.Interfaces;
+using System.IO;
+using RogueTutorial.Utils;
 
 namespace RogueTutorial
 {
@@ -148,10 +151,37 @@ namespace RogueTutorial
                     world.SetData(RunState.AwaitingInput);
                     Surface.IsDirty = true;
                     break;
+                case RunState.SaveGame:
+                    saveGameData();
+                    world.SetData(RunState.MainMenu);
+                    break;
+                case RunState.LoadGame:
+                    loadGameData();
+                    runSystems(delta);
+                    Surface.IsDirty = true;
+                    world.SetData(RunState.AwaitingInput);
+                    break;
             }
 
 
             base.Update(delta);
+        }
+
+        private void saveGameData()
+        {
+            SaveGameManager.SaveGame(world);
+        }
+
+        private void loadGameData()
+        {
+            if (world.EntityCount > 0)
+            {
+                foreach (Entity entity in world.GetEntities())
+                {
+                    entity.Destroy();
+                }
+            }
+            SaveGameManager.LoadGame(world);
         }
 
         private void runSystems(TimeSpan delta)
@@ -291,7 +321,7 @@ namespace RogueTutorial
             if (keyboard.IsKeyPressed(Keys.Escape) || keyboard.IsKeyPressed(Keys.Q))
             {
                 Surface.IsDirty = true;
-                world.SetData(RunState.MainMenu);
+                world.SetData(RunState.SaveGame);
             }
         }
 

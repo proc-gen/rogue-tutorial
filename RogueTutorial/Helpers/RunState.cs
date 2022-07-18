@@ -16,5 +16,7 @@ namespace RogueTutorial.Helpers
         ShowDropItem,
         ShowTargeting,
         MainMenu,
+        SaveGame,
+        LoadGame,
     }
 }

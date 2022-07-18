@@ -27,7 +27,7 @@ namespace RogueTutorial.Systems
             {
                 if (visibility.Dirty)
                 {
-                    visibility.VisibleTiles = map.ComputeFOV(position.Point.X, position.Point.Y, visibility.Range, true, entity.index == player.index && entity.version == player.version);
+                    visibility.VisibleTiles = map.ComputeFOV(position.Point.X, position.Point.Y, visibility.Range, true, entity.Has<Player>());
                     visibility.Dirty = false;
                 }
             });
