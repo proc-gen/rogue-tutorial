@@ -11,7 +11,8 @@ namespace RogueTutorial.Map
     public enum TileType
     {
         Wall = '#',
-        Floor = '.'
+        Floor = '.',
+        DownStairs = 31
     }
 
     public static class TileTypeExtensions
@@ -26,6 +27,9 @@ namespace RogueTutorial.Map
                 case "Floor":
                     return TileType.Floor;
                     break;
+                case "DownStairs":
+                    return TileType.DownStairs;
+                    break;
                 default:
                     return TileType.Wall;
                     break;
@@ -39,7 +43,10 @@ namespace RogueTutorial.Map
         public static ColoredGlyph WallVisible = new ColoredGlyph(Color.LimeGreen, Color.Black, (char)TileType.Wall);
 
         public static ColoredGlyph Floor = new ColoredGlyph(Color.Gray, Color.Black, (char)TileType.Floor);
-        public static ColoredGlyph FloorVisible = new ColoredGlyph(Color.LimeGreen, Color.Black, (char)TileType.Floor);
+        public static ColoredGlyph FloorVisible = new ColoredGlyph(Color.Green, Color.Black, (char)TileType.Floor);
+
+        public static ColoredGlyph DownStairs = new ColoredGlyph(Color.Gray, Color.Black, (char)TileType.DownStairs);
+        public static ColoredGlyph DownStairsVisible = new ColoredGlyph(Color.Cyan, Color.Black, (char)TileType.DownStairs);
 
     }
 }

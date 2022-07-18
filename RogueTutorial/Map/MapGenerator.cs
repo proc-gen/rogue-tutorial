@@ -46,9 +46,9 @@ namespace RogueTutorial.Map
             return map;
         }
 
-        public static Map RoomsAndCorridorsGenerator(int width, int height)
+        public static Map RoomsAndCorridorsGenerator(int width, int height, int depth)
         {
-            var map = new Map(width, height);
+            var map = new Map(width, height, depth);
 
             for (int i = 0; i < width; i++)
             {
@@ -98,7 +98,7 @@ namespace RogueTutorial.Map
                 }
             }
 
-
+            setStairsPosition(ref map);
 
             return map;
         }
@@ -128,6 +128,11 @@ namespace RogueTutorial.Map
             {
                 map.SetMapCell(x, j, TileType.Floor);
             }
+        }
+
+        private static void setStairsPosition(ref Map map)
+        {
+            map.SetMapCell(map.Rooms.Last().Center().X, map.Rooms.Last().Center().Y, TileType.DownStairs);
         }
     }
 }

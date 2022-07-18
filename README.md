@@ -23,9 +23,10 @@ Completed:
  - Section 2.8 - Items and Inventory (7/7/2022)
  - Section 2.9 - Ranged Scrolls/Targeting (7/15/2022)
  - Section 2.10 - Saving and Loading (7/17/2022)
+ - Section 2.11 - Delving Deeper (7/18/2022)
 
 In Progress
- - Section 2.11 - Delving Deeper
+ - Section 2.12 - Difficulty
 
 Other Notes
  - Section 2.7 - User Interface

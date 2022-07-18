@@ -61,6 +61,7 @@ namespace RogueTutorial.UI
         private void drawPlayerStats(ICellSurface screen)
         {
             CombatStats playerStats = _player.Get<CombatStats>();
+            screen.Print(2, 39, "Depth: " + _world.GetData<Map.Map>().Depth, Color.Yellow, Color.Black);
             screen.Print(12, 39, " HP: " + playerStats.Hp + " / " + playerStats.MaxHp + " ", Color.Yellow, Color.Black);
             screen.DrawRLTKHorizontalBar(28, 39, 51, playerStats.Hp, playerStats.MaxHp, Color.Red, Color.Black);
         }

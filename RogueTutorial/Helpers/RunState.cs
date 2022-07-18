@@ -18,5 +18,6 @@ namespace RogueTutorial.Helpers
         MainMenu,
         SaveGame,
         LoadGame,
+        NextLevel,
     }
 }
