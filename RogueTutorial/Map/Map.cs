@@ -22,14 +22,17 @@ namespace RogueTutorial.Map
 
         public int Width { get; private set; }
         public int Height { get; private set; }
+        public int Depth { get; private set; }
         public List<Rectangle> Rooms { get; set; }
 
         private IMap map { get; set; }
 
-        public Map(int width, int height)
+        public Map(int width, int height, int depth = 1)
         {
             Height = height;
             Width = width;
+            Depth = depth;
+
             _mapGrid = new TileType[width * height];
             _blocked = new bool[width * height];
             _explored = new bool[width * height];
@@ -48,7 +51,7 @@ namespace RogueTutorial.Map
         {
             _mapGrid[y * Width + x] = tileType;
             _blocked[y * Width + x] = tileType == TileType.Wall;
-            map.SetCellProperties(x, y, tileType == TileType.Floor, tileType == TileType.Floor, false);
+            map.SetCellProperties(x, y, !_blocked[y * Width + x], !_blocked[y * Width + x], false);
         }
 
         public bool IsCellWalkable(int x, int y)
@@ -80,8 +83,7 @@ namespace RogueTutorial.Map
 
         private void updateCellVisibility(int x, int y, bool visibility)
         {
-            var tileType = GetMapCell(x, y);
-            map.SetCellProperties(x, y, tileType == TileType.Floor, tileType == TileType.Floor, visibility);
+            map.SetCellProperties(x, y, !_blocked[y * Width + x], !_blocked[y * Width + x], visibility);
         }
 
         public bool IsMapCellExplored(int x, int y)
@@ -134,7 +136,8 @@ namespace RogueTutorial.Map
             sb.AppendLine("Map:" + index.ToString());
             sb.AppendLine("Width:" + Width.ToString());
             sb.AppendLine("Height:" + Height.ToString());
-            for(int i = 0; i < Rooms.Count; i++)
+            sb.AppendLine("Depth:" + Depth.ToString());
+            for (int i = 0; i < Rooms.Count; i++)
             {
                 sb = Rooms[i].Save(sb, i);
             }

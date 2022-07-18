@@ -55,7 +55,7 @@ namespace RogueTutorial
                 }
             }
 
-            Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height);
+            Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height, 1);
             Random random = new Random();
 
             world.SetData(map);
@@ -63,6 +63,43 @@ namespace RogueTutorial
 
             Spawner.SpawnPlayer(world, map.Rooms.First().Center());
 
+            populateRooms(map);
+        }
+
+        private void descendLevel(int width, int height)
+        {
+            foreach (Entity entity in world.GetEntities())
+            {
+                if (!entity.Has<Player>()
+                    || (entity.Has<InBackpack>() && !entity.Get<InBackpack>().Owner.Has<Player>()))
+                {
+                    entity.Destroy();
+                }
+            }
+
+            Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height, world.GetData<Map.Map>().Depth + 1);
+            world.SetData(map);
+            populateRooms(map);
+
+            Entity player = playerQuery.GetEntities().First();
+            
+            Position playerPosition = player.Get<Position>();
+            playerPosition.Point = map.Rooms.First().Center();
+            player.Set(playerPosition);
+
+            Viewshed playerView = player.Get<Viewshed>();
+            playerView.Dirty = true;
+            player.Set(playerView);
+
+            CombatStats playerStats = player.Get<CombatStats>();
+            playerStats.Hp = Math.Max(playerStats.Hp, playerStats.MaxHp / 2);
+            player.Set(playerStats);
+
+            world.GetData<GameLog>().Entries.Add("You take a moment to heal as you descend to the next level.");
+        }
+
+        private void populateRooms(Map.Map map)
+        {
             for (int i = 1; i < map.Rooms.Count; i++)
             {
                 Spawner.SpawnRoom(world, map.Rooms[i]);
@@ -133,6 +170,11 @@ namespace RogueTutorial
                     runSystems(delta);
                     world.SetData(RunState.AwaitingInput);
                     break;
+                case RunState.NextLevel:
+                    descendLevel(Width, Height - 10);
+                    runSystems(delta);
+                    world.SetData(RunState.AwaitingInput);
+                    break;
                 case RunState.AwaitingInput:
                 case RunState.ShowInventory:
                 case RunState.ShowDropItem:
@@ -195,7 +237,7 @@ namespace RogueTutorial
         private bool tryMovePlayer(Direction direction)
         {
             bool retVal = false;
-            var map = world.GetData<Map.Map>();
+            Map.Map map = world.GetData<Map.Map>();
 
             playerQuery.Foreach((Entity player, ref Position position, ref Viewshed visibility, ref Name name) =>
             {
@@ -226,6 +268,23 @@ namespace RogueTutorial
                 }
             });
 
+            return retVal;
+        }
+
+        private bool tryPlayerDescend()
+        {
+            bool retVal = false;
+            playerQuery.Foreach((in Map.Map map, in GameLog log, Entity player, ref Position position) =>
+            {
+                if(map.GetMapCell(position.Point.X, position.Point.Y) == TileType.DownStairs)
+                {
+                    retVal = true;
+                }
+                else
+                {
+                    log.Entries.Add("There is no way down from here.");
+                }
+            });
             return retVal;
         }
 
@@ -316,6 +375,14 @@ namespace RogueTutorial
             {
                 Surface.IsDirty = true;
                 world.SetData(RunState.ShowInventory);
+            }
+            if (keyboard.IsKeyPressed(Keys.OemPeriod))
+            {
+                if (tryPlayerDescend())
+                {
+                    world.SetData(RunState.NextLevel);
+                }
+                Surface.IsDirty = true;
             }
 
             if (keyboard.IsKeyPressed(Keys.Escape) || keyboard.IsKeyPressed(Keys.Q))
@@ -411,6 +478,9 @@ namespace RogueTutorial
                             case TileType.Wall:
                                 TileGlyphs.WallVisible.CopyAppearanceTo(Surface[i, j]);
                                 break;
+                            case TileType.DownStairs:
+                                TileGlyphs.DownStairsVisible.CopyAppearanceTo(Surface[i, j]);
+                                break;
                         }
                     }
                     else if (map.IsMapCellExplored(i, j))
@@ -422,6 +492,9 @@ namespace RogueTutorial
                                 break;
                             case TileType.Wall:
                                 TileGlyphs.Wall.CopyAppearanceTo(Surface[i, j]);
+                                break;
+                            case TileType.DownStairs:
+                                TileGlyphs.DownStairs.CopyAppearanceTo(Surface[i, j]);
                                 break;
                         }
                     }

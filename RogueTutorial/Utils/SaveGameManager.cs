@@ -253,9 +253,10 @@ namespace RogueTutorial.Utils
         {
             int width = int.Parse(fileData[index + 1].FieldValue);
             int height = int.Parse(fileData[index + 2].FieldValue);
-            
-            Map.Map map = new Map.Map(width, height);
-            map.Load(fileData, index + 3);
+            int depth = int.Parse(fileData[index + 3].FieldValue);
+
+            Map.Map map = new Map.Map(width, height, depth);
+            map.Load(fileData, index + 4);
             world.SetData(map);
         }
 
