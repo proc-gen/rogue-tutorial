@@ -20,11 +20,20 @@ Completed:
  - Section 2.5 - Monsters (7/4/2022)
  - Section 2.6 - Dealing Damage (7/5/2022)
  - Section 2.7 - User Interface (7/6/2022)
+ - Section 2.8 - Items and Inventory (7/7/2022)
+ - Section 2.9 - Ranged Scrolls/Targeting (7/15/2022)
+ - Section 2.10 - Saving and Loading (7/17/2022)
 
 In Progress
- - Section 2.8 - Items and Inventory
+ - Section 2.11 - Delving Deeper
 
-Omissions
+Other Notes
  - Section 2.7 - User Interface
    - Post-Process Scanlines
      - This feature isn't something necessary to completing the tutorial as a whole and marked as optional by the author. I may revisit this at another point in time after completing all the required parts.
+ - Section 2.9 - Ranged Scrolls/Targeting
+   - Targeting System
+     - SadConsole has Update, Render, ProcessKeyboard, and ProcessMouse all as separate functions, so the targeting was not as simple as the Rust version. It needed an additional RunState so that the GUI could be rendered properly. Consumables also needed a field to keep track if they'd been used in case the player chose to cancel out of using the scroll/item.
+ - Section 2.10 - Saving and Loading
+   - SimpleECS Limitations
+     - This section would have been very straightforward if the Entity struct provided by SimpleECS was easily serializable. Of course, this wasn't the case and meant either finding a new library after writing so much code or writing my own Save/Load code. I opted for the latter because it was more tedious than anything else and not computationally difficult. 
