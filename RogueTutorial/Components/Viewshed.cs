@@ -20,13 +20,21 @@ namespace RogueTutorial.Components
         {
             Range = int.Parse(componentData[0].FieldValue);
             VisibleTiles = new List<Point>();
-            Dirty = true;
+            for(int i = 1; i < componentData.Count; i++)
+            {
+                VisibleTiles.Add(SaveGameManager.GetPointFromFieldValue(componentData[i].FieldValue));
+            }
+            Dirty = false;
         }
 
         public StringBuilder Save(StringBuilder sb, Entity[] entities)
         {
             sb.AppendLine("Component:Viewshed");
             sb.AppendLine("Range:" + Range.ToString());
+            foreach(Point point in VisibleTiles)
+            {
+                sb.AppendLine("VisibleTile:" + point.X.ToString() + "," + point.Y.ToString());
+            }
             return sb;
         }
     }
