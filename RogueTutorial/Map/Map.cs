@@ -51,7 +51,7 @@ namespace RogueTutorial.Map
         {
             _mapGrid[y * Width + x] = tileType;
             _blocked[y * Width + x] = tileType == TileType.Wall;
-            map.SetCellProperties(x, y, !_blocked[y * Width + x], !_blocked[y * Width + x], false);
+            map.SetCellProperties(x, y, tileType != TileType.Wall, tileType != TileType.Wall, false);
         }
 
         public bool IsCellWalkable(int x, int y)
@@ -83,7 +83,8 @@ namespace RogueTutorial.Map
 
         private void updateCellVisibility(int x, int y, bool visibility)
         {
-            map.SetCellProperties(x, y, !_blocked[y * Width + x], !_blocked[y * Width + x], visibility);
+            TileType tileType = GetMapCell(x, y);
+            map.SetCellProperties(x, y, tileType != TileType.Wall, tileType != TileType.Wall, visibility);
         }
 
         public bool IsMapCellExplored(int x, int y)
@@ -98,13 +99,13 @@ namespace RogueTutorial.Map
             
             //Must make cells walkable prior to pathfinding
             //map.SetCellProperties(oldStartCell.X, oldStartCell.Y, true, true);
-            //map.SetCellProperties(oldEndCell.X, oldEndCell.Y, true, true);
+            map.SetCellProperties(oldEndCell.X, oldEndCell.Y, true, true);
 
             PathFinder pathFinder = new PathFinder(map, 1.45);
             Path path = pathFinder.TryFindShortestPath(oldStartCell, oldEndCell);
 
             //map.SetCellProperties(oldStartCell.X, oldStartCell.Y, oldStartCell.IsTransparent, oldStartCell.IsWalkable);
-            //map.SetCellProperties(oldEndCell.X, oldEndCell.Y, oldEndCell.IsTransparent, oldEndCell.IsWalkable);
+            map.SetCellProperties(oldEndCell.X, oldEndCell.Y, oldEndCell.IsTransparent, oldEndCell.IsWalkable);
 
             return path;
         }
