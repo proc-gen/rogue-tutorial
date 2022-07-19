@@ -274,6 +274,7 @@ namespace RogueTutorial
         private bool tryPlayerDescend()
         {
             bool retVal = false;
+            
             playerQuery.Foreach((in Map.Map map, in GameLog log, Entity player, ref Position position) =>
             {
                 if(map.GetMapCell(position.Point.X, position.Point.Y) == TileType.DownStairs)
@@ -286,6 +287,28 @@ namespace RogueTutorial
                 }
             });
             return retVal;
+        }
+
+        private void skipPlayerTurn()
+        {
+            playerQuery.Foreach((in Map.Map map, Entity player, ref Position position, ref Viewshed viewshed, ref CombatStats combatStats) =>
+            {
+                bool canHeal = true;
+
+                foreach(Point visible in viewshed.VisibleTiles)
+                {
+                    if(map.GetCellEntities(visible).Any(a => a.Has<Monster>()))
+                    {
+                        canHeal = false;
+                    }
+                }
+
+                if (canHeal)
+                {
+                    combatStats.Hp = Math.Min(combatStats.Hp + 1, combatStats.MaxHp);
+                }
+            });
+
         }
 
         public override bool ProcessKeyboard(Keyboard keyboard)
@@ -382,6 +405,12 @@ namespace RogueTutorial
                 {
                     world.SetData(RunState.NextLevel);
                 }
+                Surface.IsDirty = true;
+            }
+            if(keyboard.IsKeyPressed(Keys.Space) || keyboard.IsKeyPressed(Keys.NumPad5))
+            {
+                skipPlayerTurn();
+                world.SetData(RunState.PlayerTurn);
                 Surface.IsDirty = true;
             }
 
