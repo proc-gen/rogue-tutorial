@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SadConsole;
+using RogueTutorial.Utils;
 
 namespace RogueTutorial.Map
 {
@@ -28,22 +29,35 @@ namespace RogueTutorial.Map
 
         public static void SpawnRoom(World world, Rectangle room)
         {
-            spawnMonsters(world, room);
-            spawnItems(world, room);
+            int depth = world.GetData<Map>().Depth;
+            List<Point> spawnPoints = getNonPlayerSpawnPoints(world, room, depth);
+            spawnNonPlayerEntities(world, spawnPoints, depth);
         }
 
-        private static void spawnMonsters(World world, Rectangle room)
+        private static RandomTable roomTable(int depth)
+        {
+            return new RandomTable()
+                        .Add("Goblin", 10)
+                        .Add("Orc", 1 + depth)
+                        .Add("Health Potion", 7)
+                        .Add("Fireball Scroll", 2 + depth)
+                        .Add("Confusion Scroll", 2 + depth)
+                        .Add("Magic Missile Scroll", 4);
+        }
+
+        private static List<Point> getNonPlayerSpawnPoints(World world, Rectangle room, int depth)
         {
             Random random = world.GetData<Random>();
 
             List<Point> spawnPoints = new List<Point>();
-            int numMonsters = random.Next(MAX_MONSTERS + 1);
+            int numPoints = random.Next(1, MAX_MONSTERS + 4) + (depth - 1) - 3;
 
-            for (int i = 0; i < numMonsters; i++)
+            for (int i = 0; i < numPoints; i++)
             {
                 bool added = false;
                 Point spawnPoint = Point.None;
-                while (!added)
+                int tries = 0;
+                while (!added && tries < 20)
                 {
                     spawnPoint = new Point(room.X1 + random.Next(1, Math.Abs(room.X2 - room.X1))
                                             , room.Y1 + random.Next(1, room.Y2 - room.Y1));
@@ -51,57 +65,46 @@ namespace RogueTutorial.Map
                     {
                         added = true;
                     }
-                };
-                spawnPoints.Add(spawnPoint);
-            }
-
-            foreach (Point spawnPoint in spawnPoints)
-            {
-                SpawnMonster(world, spawnPoint);
-            }
-        }
-
-        private static void spawnItems(World world, Rectangle room)
-        {
-            Random random = world.GetData<Random>();
-
-            List<Point> spawnPoints = new List<Point>();
-            int numItems = random.Next(MAX_ITEMS + 1);
-
-            for (int i = 0; i < numItems; i++)
-            {
-                bool added = false;
-                Point spawnPoint = Point.None;
-                while (!added)
-                {
-                    spawnPoint = new Point(room.X1 + random.Next(1, Math.Abs(room.X2 - room.X1))
-                                            , room.Y1 + random.Next(1, room.Y2 - room.Y1));
-                    if (!spawnPoints.Contains(spawnPoint))
+                    else
                     {
-                        added = true;
+                        tries++;
                     }
                 };
                 spawnPoints.Add(spawnPoint);
             }
 
-            foreach (Point spawnPoint in spawnPoints)
-            {
-                SpawnItem(world, spawnPoint);
-            }
+            return spawnPoints;            
         }
 
-        public static Entity SpawnMonster(World world, Point start)
+
+        private static void spawnNonPlayerEntities(World world, List<Point> spawnPoints, int depth)
         {
             Random random = world.GetData<Random>();
+            RandomTable randomTable = roomTable(depth);
 
-            switch (random.Next(2))
+            foreach (Point spawnPoint in spawnPoints)
             {
-                case 0:
-                    return spawnGoblin(world, start);
-                    break;
-                default:
-                    return spawnOrc(world, start);
-                    break;
+                switch (randomTable.Roll(random))
+                {
+                    case "Goblin":
+                        spawnGoblin(world, spawnPoint);
+                        break;
+                    case "Orc":
+                        spawnOrc(world, spawnPoint);
+                        break;
+                    case "Health Potion":
+                        spawnHealthPotion(world, spawnPoint);
+                        break;
+                    case "Fireball Scroll":
+                        spawnFireballScroll(world, spawnPoint);
+                        break;
+                    case "Confusion Scroll":
+                        spawnConfusionScroll(world, spawnPoint);
+                        break;
+                    case "Magic Missile Scroll":
+                        spawnMagicMissileScroll(world, spawnPoint);
+                        break;
+                }
             }
         }
 
@@ -124,26 +127,6 @@ namespace RogueTutorial.Map
                                         , new Name() { EntityName = name }
                                         , new BlocksTile()
                                         , new CombatStats() { MaxHp = 16, Hp = 16, Defense = 1, Power = 4 });
-        }
-
-        public static Entity SpawnItem(World world, Point start)
-        {
-            Random random = world.GetData<Random>();
-
-            switch (random.Next(4))
-            {
-                case 0:
-                    return spawnHealthPotion(world, start);
-                    break;
-                case 1:
-                    return spawnMagicMissileScroll(world, start);
-                    break;
-                case 2:
-                    return spawnConfusionScroll(world, start);
-                    break;
-                default:
-                    return spawnFireballScroll(world, start);
-            }
         }
 
         private static Entity spawnHealthPotion(World world, Point start)
