@@ -24,9 +24,10 @@ Completed:
  - Section 2.9 - Ranged Scrolls/Targeting (7/15/2022)
  - Section 2.10 - Saving and Loading (7/17/2022)
  - Section 2.11 - Delving Deeper (7/18/2022)
+ - Section 2.12 - Difficulty (7/19/2022)
 
 In Progress
- - Section 2.12 - Difficulty
+ - Section 2.13 - Equipment
 
 Other Notes
  - Section 2.7 - User Interface
