@@ -37,14 +37,19 @@ namespace RogueTutorial.Utils
 
             sb = world.GetData<Map.Map>().Save(sb, 0);
 
-            if (File.Exists("savegame.txt"))
-            {
-                File.Delete("savegame.txt");
-            }
+            deleteSaveData();
 
             using (StreamWriter file = new StreamWriter("savegame.txt"))
             {
                 file.Write(sb.ToString());
+            }
+        }
+
+        private static void deleteSaveData()
+        {
+            if (File.Exists("savegame.txt"))
+            {
+                File.Delete("savegame.txt");
             }
         }
 
@@ -53,6 +58,7 @@ namespace RogueTutorial.Utils
             world.SetData(new Random());
 
             List<LineData> fileData = getFileData();
+            deleteSaveData();
             loadEntityCount(ref world, fileData);
             Entity[] entities = world.GetEntities();
             int index = loadEntities(entities, fileData);
