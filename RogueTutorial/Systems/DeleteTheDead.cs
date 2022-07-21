@@ -27,6 +27,7 @@ namespace RogueTutorial.Systems
                     if (entity.Has<Player>())
                     {
                         log.Entries.Add("You are dead");
+                        world.SetData(RunState.PlayerDeath);
                     }
                     else
                     {

@@ -47,13 +47,9 @@ namespace RogueTutorial
 
         private void startNewGame(int width, int height)
         {
-            if(world.EntityCount > 0)
-            {
-                foreach(Entity entity in world.GetEntities())
-                {
-                    entity.Destroy();
-                }
-            }
+            clearEntities();
+
+            world.GetData<GameLog>().Entries.Add("Welcome to Rusty Roguelike");
 
             Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height, 1);
             Random random = new Random();
@@ -158,7 +154,7 @@ namespace RogueTutorial
         {
             gameGui = new GameGui(world, playerQuery);
             menuGui = new MenuGui(world);
-            world.SetData(new GameLog() { Entries = new List<string>() { "Welcome to Rusty Roguelike" } });
+            world.SetData(new GameLog() { Entries = new List<string>() });
         }
 
         public override void Update(TimeSpan delta)
@@ -179,6 +175,7 @@ namespace RogueTutorial
                 case RunState.ShowInventory:
                 case RunState.ShowDropItem:
                 case RunState.ShowTargeting:
+                case RunState.PlayerDeath:
                     //Do Nothing
                     break;
                 case RunState.PlayerTurn:
@@ -190,7 +187,10 @@ namespace RogueTutorial
                     break;
                 case RunState.MonsterTurn:
                     runSystems(delta);
-                    world.SetData(RunState.AwaitingInput);
+                    if (world.GetData<RunState>() == RunState.MonsterTurn) 
+                    { 
+                        world.SetData(RunState.AwaitingInput);
+                    }
                     Surface.IsDirty = true;
                     break;
                 case RunState.SaveGame:
@@ -214,7 +214,7 @@ namespace RogueTutorial
             SaveGameManager.SaveGame(world);
         }
 
-        private void loadGameData()
+        private void clearEntities()
         {
             if (world.EntityCount > 0)
             {
@@ -223,6 +223,13 @@ namespace RogueTutorial
                     entity.Destroy();
                 }
             }
+            world.GetData<GameLog>().Entries.Clear();
+        }
+
+        private void loadGameData()
+        {
+            clearEntities();
+            world.GetData<GameLog>().Entries.Add("Welcome to Rusty Roguelike");
             SaveGameManager.LoadGame(world);
         }
 
@@ -329,6 +336,9 @@ namespace RogueTutorial
                     break;
                 case RunState.MainMenu:
                     processKeyboardMainMenu(keyboard);
+                    break;
+                case RunState.PlayerDeath:
+                    processKeyboardPlayerDead(keyboard);
                     break;
             }
 
@@ -439,6 +449,16 @@ namespace RogueTutorial
         private void processKeyboardMainMenu(Keyboard keyboard)
         {
             menuGui.ProcessKeyboard(keyboard, Surface);
+        }
+
+        private void processKeyboardPlayerDead(Keyboard keyboard)
+        {
+            if (keyboard.HasKeysPressed)
+            {
+                clearEntities();
+                world.SetData(RunState.MainMenu);
+                Surface.IsDirty = true;
+            }
         }
 
         public override bool ProcessMouse(MouseScreenObjectState state)

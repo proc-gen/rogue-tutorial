@@ -19,5 +19,6 @@ namespace RogueTutorial.Helpers
         SaveGame,
         LoadGame,
         NextLevel,
+        PlayerDeath,
     }
 }
