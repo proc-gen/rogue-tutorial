@@ -64,21 +64,35 @@ namespace RogueTutorial
 
         private void descendLevel(int width, int height)
         {
-            foreach (Entity entity in world.GetEntities())
+            world.CreateQuery().Foreach((Entity entity) =>
             {
-                if (!entity.Has<Player>()
-                    || (entity.Has<InBackpack>() && !entity.Get<InBackpack>().Owner.Has<Player>()))
+                bool remove = false;
+                if (!entity.Has<Player>())
+                {
+                    if (entity.Has<InBackpack>())
+                    {
+                        if (!entity.Get<InBackpack>().Owner.Has<Player>())
+                        {
+                            remove = true;
+                        }
+                    }
+                    else
+                    {
+                        remove = true;
+                    }
+                }
+                if (remove)
                 {
                     entity.Destroy();
                 }
-            }
+            });
 
             Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height, world.GetData<Map.Map>().Depth + 1);
             world.SetData(map);
             populateRooms(map);
 
             Entity player = playerQuery.GetEntities().First();
-            
+
             Position playerPosition = player.Get<Position>();
             playerPosition.Point = map.Rooms.First().Center();
             player.Set(playerPosition);
