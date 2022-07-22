@@ -64,28 +64,7 @@ namespace RogueTutorial
 
         private void descendLevel(int width, int height)
         {
-            world.CreateQuery().Foreach((Entity entity) =>
-            {
-                bool remove = false;
-                if (!entity.Has<Player>())
-                {
-                    if (entity.Has<InBackpack>())
-                    {
-                        if (!entity.Get<InBackpack>().Owner.Has<Player>())
-                        {
-                            remove = true;
-                        }
-                    }
-                    else
-                    {
-                        remove = true;
-                    }
-                }
-                if (remove)
-                {
-                    entity.Destroy();
-                }
-            });
+            clearEntities(false);
 
             Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height, world.GetData<Map.Map>().Depth + 1);
             world.SetData(map);
@@ -228,16 +207,21 @@ namespace RogueTutorial
             SaveGameManager.SaveGame(world);
         }
 
-        private void clearEntities()
+        private void clearEntities(bool clearAll = true)
         {
-            if (world.EntityCount > 0)
+            world.CreateQuery().Foreach((Entity entity) =>
             {
-                foreach (Entity entity in world.GetEntities())
+                if (clearAll
+                    || (!entity.Has<Player>() && !entity.Has<InBackpack>())
+                    || (entity.Has<InBackpack>() && !entity.Get<InBackpack>().Owner.Has<Player>()))
                 {
                     entity.Destroy();
                 }
+            });
+            if (clearAll)
+            {
+                world.GetData<GameLog>().Entries.Clear();
             }
-            world.GetData<GameLog>().Entries.Clear();
         }
 
         private void loadGameData()
