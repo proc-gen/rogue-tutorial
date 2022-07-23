@@ -25,9 +25,10 @@ Completed:
  - Section 2.10 - Saving and Loading (7/17/2022)
  - Section 2.11 - Delving Deeper (7/18/2022)
  - Section 2.12 - Difficulty (7/19/2022)
+ - Section 2.13 - Equipment (7/22/2022)
 
 In Progress
- - Section 2.13 - Equipment
+ - Minor refactoring and bug fixes
 
 Other Notes
  - Section 2.7 - User Interface
@@ -39,3 +40,6 @@ Other Notes
  - Section 2.10 - Saving and Loading
    - SimpleECS Limitations
      - This section would have been very straightforward if the Entity struct provided by SimpleECS was easily serializable. Of course, this wasn't the case and meant either finding a new library after writing so much code or writing my own Save/Load code. I opted for the latter because it was more tedious than anything else and not computationally difficult. 
+ - Section 2.13 - Equipment
+   - SimpleECS Oddities
+     - I'm not sure what caused this to happen, but the equipped entities query for the melee combat system would not work unless it was instantiated in the function using it for calculations. If the query was instantiated at system creation, it wasn't picking up any of the entities that it was supposed to find.'
