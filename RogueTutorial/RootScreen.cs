@@ -23,7 +23,6 @@ namespace RogueTutorial
     {
         World world;
         Query renderablesQuery;
-        Query playerQuery;
         GameGui gameGui;
         MenuGui menuGui;
         List<ECSSystem> systems;
@@ -70,7 +69,7 @@ namespace RogueTutorial
             world.SetData(map);
             populateRooms(map);
 
-            Entity player = playerQuery.GetEntities().First();
+            Entity player = PlayerFunctions.GetPlayer(world);
 
             Position playerPosition = player.Get<Position>();
             playerPosition.Point = map.Rooms.First().Center();
@@ -101,54 +100,25 @@ namespace RogueTutorial
                                 .Has<Position>()
                                 .Has<Renderable>();
 
-            playerQuery = world.CreateQuery().Has<Player>();
-
-            systems = new List<ECSSystem>();
-
-            systems.Add(new MonsterSystem(world
-                                            , world.CreateQuery()
-                                                .Has<Position>()
-                                                .Has<Viewshed>()
-                                                .Has<Monster>()
-                                            , playerQuery));
-            systems.Add(new ItemUseSystem(world
-                                            , world.CreateQuery()
-                                                .Has<WantsToUseItem>()));
-            systems.Add(new ItemConsumedSystem(world
-                                            , world.CreateQuery()
-                                                .Has<WantsToUseItem>()));
-            systems.Add(new ItemDropSystem(world
-                                            , world.CreateQuery()
-                                                .Has<WantsToDropItem>()));
-            systems.Add(new ItemRemoveSystem(world
-                                            , world.CreateQuery()
-                                                .Has<WantsToRemoveItem>()));
-            systems.Add(new VisibilitySystem(world
-                                                , world.CreateQuery()
-                                                    .Has<Position>()
-                                                    .Has<Viewshed>()
-                                                , playerQuery));
-            systems.Add(new PositionSystem(world
-                                            , world.CreateQuery()
-                                                .Has<Position>()));
-            systems.Add(new ItemCollectionSystem(world
-                                                    , world.CreateQuery()
-                                                        .Has<WantsToPickupItem>()));
-            systems.Add(new MeleeCombatSystem(world
-                                                , world.CreateQuery()
-                                                    .Has<WantsToMelee>()));
-            systems.Add(new DamageSystem(world
-                                            , world.CreateQuery()
-                                                .Has<SufferDamage>()));
-            systems.Add(new DeleteTheDead(world
-                                            , world.CreateQuery()
-                                                .Has<CombatStats>()));
-            
+            systems = new List<ECSSystem>()
+            {
+                new MonsterSystem(world),
+                new ItemUseSystem(world),
+                new ItemConsumedSystem(world),
+                new ItemDropSystem(world),
+                new ItemRemoveSystem(world),
+                new VisibilitySystem(world),
+                new PositionSystem(world),
+                new ItemCollectionSystem(world),
+                new MeleeCombatSystem(world),
+                new DamageSystem(world),
+                new DeleteTheDead(world)
+            };
         }
 
         private void initializeGuis()
         {
-            gameGui = new GameGui(world, playerQuery);
+            gameGui = new GameGui(world);
             menuGui = new MenuGui(world);
             world.SetData(new GameLog() { Entries = new List<string>() });
         }
@@ -244,83 +214,7 @@ namespace RogueTutorial
             }
         }
 
-        private bool tryMovePlayer(Direction direction)
-        {
-            bool retVal = false;
-            Map.Map map = world.GetData<Map.Map>();
-
-            playerQuery.Foreach((Entity player, ref Position position, ref Viewshed visibility, ref Name name) =>
-            {
-                Point newPoint = position.Point.Add(direction);
-                if(map.IsCellWalkable(newPoint.X,newPoint.Y))
-                {
-                    position.Point = newPoint;
-                    visibility.Dirty = true;
-
-                    map.SetCellWalkable(position.PreviousPoint.X, position.PreviousPoint.Y, true);
-                    map.SetCellWalkable(position.Point.X, position.Point.Y, false);
-                    position.Dirty = false;
-
-                    retVal = true;
-                }
-                else
-                {
-                    List<Entity> cellEntities = map.GetCellEntities(newPoint);
-                    if(cellEntities.Count > 0)
-                    {
-                        Entity monster = cellEntities.Where(a => a.Has<Monster>()).FirstOrDefault();
-                        if(monster)
-                        {
-                            player.Set(new WantsToMelee() { Target = monster});
-                            retVal = true;
-                        }
-                    }
-                }
-            });
-
-            return retVal;
-        }
-
-        private bool tryPlayerDescend()
-        {
-            bool retVal = false;
-            
-            playerQuery.Foreach((in Map.Map map, in GameLog log, Entity player, ref Position position) =>
-            {
-                if(map.GetMapCell(position.Point.X, position.Point.Y) == TileType.DownStairs)
-                {
-                    retVal = true;
-                }
-                else
-                {
-                    log.Entries.Add("There is no way down from here.");
-                }
-            });
-            return retVal;
-        }
-
-        private void skipPlayerTurn()
-        {
-            playerQuery.Foreach((in Map.Map map, Entity player, ref Position position, ref Viewshed viewshed, ref CombatStats combatStats) =>
-            {
-                bool canHeal = true;
-
-                foreach(Point visible in viewshed.VisibleTiles)
-                {
-                    if(map.GetCellEntities(visible).Any(a => a.Has<Monster>()))
-                    {
-                        canHeal = false;
-                    }
-                }
-
-                if (canHeal)
-                {
-                    combatStats.Hp = Math.Min(combatStats.Hp + 1, combatStats.MaxHp);
-                }
-            });
-
-        }
-
+        
         public override bool ProcessKeyboard(Keyboard keyboard)
         {
             switch (world.GetData<RunState>())
@@ -355,48 +249,48 @@ namespace RogueTutorial
         {
             if (keyboard.IsKeyPressed(Keys.Left) || keyboard.IsKeyPressed(Keys.NumPad4) || keyboard.IsKeyPressed(Keys.H))
             {
-                Surface.IsDirty = tryMovePlayer(Direction.Left);
+                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.Left);
                 world.SetData(RunState.PlayerTurn);
             }
             if (keyboard.IsKeyPressed(Keys.Right) || keyboard.IsKeyPressed(Keys.NumPad6) || keyboard.IsKeyPressed(Keys.L))
             {
-                Surface.IsDirty = tryMovePlayer(Direction.Right);
+                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.Right);
                 world.SetData(RunState.PlayerTurn);
             }
             if (keyboard.IsKeyPressed(Keys.Up) || keyboard.IsKeyPressed(Keys.NumPad8) || keyboard.IsKeyPressed(Keys.K))
             {
-                Surface.IsDirty = tryMovePlayer(Direction.Up);
+                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.Up);
                 world.SetData(RunState.PlayerTurn);
             }
             if (keyboard.IsKeyPressed(Keys.Down) || keyboard.IsKeyPressed(Keys.NumPad2) || keyboard.IsKeyPressed(Keys.J))
             {
-                Surface.IsDirty = tryMovePlayer(Direction.Down);
+                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.Down);
                 world.SetData(RunState.PlayerTurn);
             }
             if (keyboard.IsKeyPressed(Keys.NumPad9) || keyboard.IsKeyPressed(Keys.Y))
             {
-                Surface.IsDirty = tryMovePlayer(Direction.UpRight);
+                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.UpRight);
                 world.SetData(RunState.PlayerTurn);
             }
             if (keyboard.IsKeyPressed(Keys.NumPad7) || keyboard.IsKeyPressed(Keys.U))
             {
-                Surface.IsDirty = tryMovePlayer(Direction.UpLeft);
+                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.UpLeft);
                 world.SetData(RunState.PlayerTurn);
             }
             if (keyboard.IsKeyPressed(Keys.NumPad3) || keyboard.IsKeyPressed(Keys.N))
             {
-                Surface.IsDirty = tryMovePlayer(Direction.DownRight);
+                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.DownRight);
                 world.SetData(RunState.PlayerTurn);
             }
             if (keyboard.IsKeyPressed(Keys.NumPad1) || keyboard.IsKeyPressed(Keys.B))
             {
-                Surface.IsDirty = tryMovePlayer(Direction.DownLeft);
+                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.DownLeft);
                 world.SetData(RunState.PlayerTurn);
             }
 
             if (keyboard.IsKeyPressed(Keys.G))
             {
-                switch(ItemCollectionSystem.GetItem(world, playerQuery.GetEntities()[0]))
+                switch(ItemCollectionSystem.GetItem(world, PlayerFunctions.GetPlayer(world)))
                 {
                     case 0:
                         //Do nothing
@@ -427,7 +321,7 @@ namespace RogueTutorial
             }
             if (keyboard.IsKeyPressed(Keys.OemPeriod))
             {
-                if (tryPlayerDescend())
+                if (PlayerFunctions.TryPlayerDescend(world))
                 {
                     world.SetData(RunState.NextLevel);
                 }
@@ -435,7 +329,7 @@ namespace RogueTutorial
             }
             if(keyboard.IsKeyPressed(Keys.Space) || keyboard.IsKeyPressed(Keys.NumPad5))
             {
-                skipPlayerTurn();
+                PlayerFunctions.SkipPlayerTurn(world);
                 world.SetData(RunState.PlayerTurn);
                 Surface.IsDirty = true;
             }
@@ -533,7 +427,7 @@ namespace RogueTutorial
         private void renderGame()
         {
             Map.Map map = world.GetData<Map.Map>();
-            Entity player = playerQuery.GetEntities()[0];
+            Entity player = PlayerFunctions.GetPlayer(world);
             Viewshed playerVisibility = player.Get<Viewshed>();
 
             renderMap(map, playerVisibility);

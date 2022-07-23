@@ -12,16 +12,17 @@ namespace RogueTutorial.Systems
 {
     internal class PositionSystem : ECSSystem
     {
-        public PositionSystem(World world, Query query) : base(world, query)
+        public PositionSystem(World world) 
+            : base(world, world.CreateQuery()
+                                .Has<Position>())
         {
         }
 
         public override void Run(TimeSpan delta)
         {
-            Map.Map map = world.GetData<Map.Map>();
-            map.ResetTileContent();
+            world.GetData<Map.Map>().ResetTileContent();
 
-            query.Foreach((Entity entity, ref Position position, ref BlocksTile blocksTile) =>
+            query.Foreach((in Map.Map map, Entity entity, ref Position position, ref BlocksTile blocksTile) =>
             {
                 map.AddCellEntity(entity, position.Point);
             });
