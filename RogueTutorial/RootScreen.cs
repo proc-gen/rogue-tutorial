@@ -26,7 +26,7 @@ namespace RogueTutorial
         GameGui gameGui;
         MenuGui menuGui;
         List<ECSSystem> systems;
-
+        ParticleRemovalSystem particleRemovalSystem;
         Point? mousePosition;
 
         public RootScreen(int width, int height)
@@ -35,7 +35,6 @@ namespace RogueTutorial
             createWorld();
             initializeSystems();
             initializeGuis();
-            this.Surface.IsDirty = true;
         }
 
         private void createWorld()
@@ -112,8 +111,11 @@ namespace RogueTutorial
                 new ItemCollectionSystem(world),
                 new MeleeCombatSystem(world),
                 new DamageSystem(world),
-                new DeleteTheDead(world)
+                new DeleteTheDead(world),
+                new ParticleCreationSystem(world),
             };
+
+            particleRemovalSystem = new ParticleRemovalSystem(world);
         }
 
         private void initializeGuis()
@@ -125,6 +127,8 @@ namespace RogueTutorial
 
         public override void Update(TimeSpan delta)
         {
+            particleRemovalSystem.Run(delta);
+
             switch (world.GetData<RunState>())
             {
                 case RunState.PreRun:
@@ -158,7 +162,6 @@ namespace RogueTutorial
                     { 
                         world.SetData(RunState.AwaitingInput);
                     }
-                    Surface.IsDirty = true;
                     break;
                 case RunState.SaveGame:
                     saveGameData();
@@ -167,7 +170,6 @@ namespace RogueTutorial
                 case RunState.LoadGame:
                     loadGameData();
                     runSystems(delta);
-                    Surface.IsDirty = true;
                     world.SetData(RunState.AwaitingInput);
                     break;
             }
@@ -249,43 +251,59 @@ namespace RogueTutorial
         {
             if (keyboard.IsKeyPressed(Keys.Left) || keyboard.IsKeyPressed(Keys.NumPad4) || keyboard.IsKeyPressed(Keys.H))
             {
-                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.Left);
-                world.SetData(RunState.PlayerTurn);
+                if (PlayerFunctions.TryMovePlayer(world, Direction.Left))
+                {
+                    world.SetData(RunState.PlayerTurn);
+                }
             }
             if (keyboard.IsKeyPressed(Keys.Right) || keyboard.IsKeyPressed(Keys.NumPad6) || keyboard.IsKeyPressed(Keys.L))
             {
-                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.Right);
-                world.SetData(RunState.PlayerTurn);
+                if (PlayerFunctions.TryMovePlayer(world, Direction.Right))
+                {
+                    world.SetData(RunState.PlayerTurn);
+                }
             }
             if (keyboard.IsKeyPressed(Keys.Up) || keyboard.IsKeyPressed(Keys.NumPad8) || keyboard.IsKeyPressed(Keys.K))
             {
-                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.Up);
-                world.SetData(RunState.PlayerTurn);
+                if (PlayerFunctions.TryMovePlayer(world, Direction.Up))
+                {
+                    world.SetData(RunState.PlayerTurn);
+                }
             }
             if (keyboard.IsKeyPressed(Keys.Down) || keyboard.IsKeyPressed(Keys.NumPad2) || keyboard.IsKeyPressed(Keys.J))
             {
-                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.Down);
-                world.SetData(RunState.PlayerTurn);
+                if (PlayerFunctions.TryMovePlayer(world, Direction.Down))
+                {
+                    world.SetData(RunState.PlayerTurn);
+                }
             }
             if (keyboard.IsKeyPressed(Keys.NumPad9) || keyboard.IsKeyPressed(Keys.Y))
             {
-                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.UpRight);
-                world.SetData(RunState.PlayerTurn);
+                if (PlayerFunctions.TryMovePlayer(world, Direction.UpRight))
+                {
+                    world.SetData(RunState.PlayerTurn);
+                }
             }
             if (keyboard.IsKeyPressed(Keys.NumPad7) || keyboard.IsKeyPressed(Keys.U))
             {
-                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.UpLeft);
-                world.SetData(RunState.PlayerTurn);
+                if (PlayerFunctions.TryMovePlayer(world, Direction.UpLeft))
+                {
+                    world.SetData(RunState.PlayerTurn);
+                }
             }
             if (keyboard.IsKeyPressed(Keys.NumPad3) || keyboard.IsKeyPressed(Keys.N))
             {
-                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.DownRight);
-                world.SetData(RunState.PlayerTurn);
+                if (PlayerFunctions.TryMovePlayer(world, Direction.DownRight))
+                {
+                    world.SetData(RunState.PlayerTurn);
+                }
             }
             if (keyboard.IsKeyPressed(Keys.NumPad1) || keyboard.IsKeyPressed(Keys.B))
             {
-                Surface.IsDirty = PlayerFunctions.TryMovePlayer(world, Direction.DownLeft);
-                world.SetData(RunState.PlayerTurn);
+                if (PlayerFunctions.TryMovePlayer(world, Direction.DownLeft))
+                {
+                    world.SetData(RunState.PlayerTurn);
+                }
             }
 
             if (keyboard.IsKeyPressed(Keys.G))
@@ -296,27 +314,22 @@ namespace RogueTutorial
                         //Do nothing
                         break;
                     case 1:
-                        Surface.IsDirty = true;
                         world.SetData(RunState.PlayerTurn);
                         break;
                     case 2:
-                        Surface.IsDirty = true;
                         break;
                 }
             }
             if (keyboard.IsKeyPressed(Keys.I))
             {
-                Surface.IsDirty = true;
                 world.SetData(RunState.ShowInventory);
             }
             if (keyboard.IsKeyPressed(Keys.D))
             {
-                Surface.IsDirty = true;
                 world.SetData(RunState.ShowDropItem);
             }
             if (keyboard.IsKeyPressed(Keys.R))
             {
-                Surface.IsDirty = true;
                 world.SetData(RunState.ShowRemoveItem);
             }
             if (keyboard.IsKeyPressed(Keys.OemPeriod))
@@ -325,18 +338,15 @@ namespace RogueTutorial
                 {
                     world.SetData(RunState.NextLevel);
                 }
-                Surface.IsDirty = true;
             }
             if(keyboard.IsKeyPressed(Keys.Space) || keyboard.IsKeyPressed(Keys.NumPad5))
             {
                 PlayerFunctions.SkipPlayerTurn(world);
                 world.SetData(RunState.PlayerTurn);
-                Surface.IsDirty = true;
             }
 
             if (keyboard.IsKeyPressed(Keys.Escape) || keyboard.IsKeyPressed(Keys.Q))
             {
-                Surface.IsDirty = true;
                 world.SetData(RunState.SaveGame);
             }
         }
@@ -372,7 +382,6 @@ namespace RogueTutorial
             {
                 clearEntities();
                 world.SetData(RunState.MainMenu);
-                Surface.IsDirty = true;
             }
         }
 
@@ -383,7 +392,6 @@ namespace RogueTutorial
                 if(mousePosition != state.CellPosition)
                 {
                     mousePosition = state.CellPosition;
-                    Surface.IsDirty = true;
                 }
 
                 if(world.GetData<RunState>() == RunState.ShowTargeting)
@@ -393,10 +401,6 @@ namespace RogueTutorial
             }
             else
             {
-                if(mousePosition != null)
-                {
-                    Surface.IsDirty = true;
-                }
                 mousePosition = null;
             }
             return base.ProcessMouse(state);
@@ -404,23 +408,21 @@ namespace RogueTutorial
 
         public override void Render(TimeSpan delta)
         {
-            if (Surface.IsDirty)
+            
+            Surface.Clear();
+            switch (world.GetData<RunState>())
             {
-                Surface.Clear();
-                switch (world.GetData<RunState>())
-                {
-                    case RunState.MainMenu:
-                        menuGui.Render(Surface, mousePosition);
-                        break;
-                    case RunState.PlayerDeath:
-                        renderGameOver();
-                        break;
-                    default:
-                        renderGame();
-                        break;
-                }
-
+                case RunState.MainMenu:
+                    menuGui.Render(Surface, mousePosition);
+                    break;
+                case RunState.PlayerDeath:
+                    renderGameOver();
+                    break;
+                default:
+                    renderGame();
+                    break;
             }
+
             base.Render(delta);
         }
 
@@ -488,7 +490,15 @@ namespace RogueTutorial
                 Point point = entity.Get<Position>().Point;
                 if(playerVisibility.VisibleTiles.Any(a => a == point))
                 {
-                    entity.Get<Renderable>().Glyph.CopyAppearanceTo(Surface[point]);
+                    if (entity.TryGet(out ParticleLifetime particleLifetime) 
+                        && particleLifetime.LifetimeMilliseconds > 0)
+                    {
+                        entity.Get<Renderable>().Glyph.CopyAppearanceTo(Surface[point]);
+                    }
+                    else
+                    {
+                        entity.Get<Renderable>().Glyph.CopyAppearanceTo(Surface[point]);
+                    }
                 }
             }
         }

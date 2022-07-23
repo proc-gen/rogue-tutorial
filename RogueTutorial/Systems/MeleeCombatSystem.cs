@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 using RogueTutorial.Components;
 using RogueTutorial.Helpers;
+using SadConsole;
+using SadRogue.Primitives;
 
 namespace RogueTutorial.Systems
 {
@@ -33,7 +35,7 @@ namespace RogueTutorial.Systems
                     {
                         Name targetName = wantsMelee.Target.Get<Name>();
                         int damage = calculateTargetDamage(entity, wantsMelee, stats, targetStats);
-
+                        entity.Set(new WantsCreateParticle() { LifetimeMilliseconds = 200.0f, Point = wantsMelee.Target.Get<Position>().Point, Glyph = new ColoredGlyph(Color.Orange, Color.Black, 19) });
                         if(damage > 0)
                         {
                             SufferDamage targetDamage = null;

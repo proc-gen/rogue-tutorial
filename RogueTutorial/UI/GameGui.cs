@@ -196,7 +196,6 @@ namespace RogueTutorial.UI
 
             if (keyboard.IsKeyPressed(Keys.Escape))
             {
-                screen.IsDirty = true;
                 _world.SetData(RunState.AwaitingInput);
             }
 
@@ -207,7 +206,6 @@ namespace RogueTutorial.UI
                 {
                     _player.Set(new WantsToUseItem() { Item = item });
                     _world.SetData(RunState.PlayerTurn);
-                    screen.IsDirty = true;
                     return;
                 }
                 keyToCheck++;
@@ -220,7 +218,6 @@ namespace RogueTutorial.UI
 
             if (keyboard.IsKeyPressed(Keys.Escape))
             {
-                screen.IsDirty = true;
                 _world.SetData(RunState.AwaitingInput);
             }
 
@@ -231,7 +228,6 @@ namespace RogueTutorial.UI
                 {
                     _player.Set(new WantsToDropItem() { Item = item });
                     _world.SetData(RunState.PlayerTurn);
-                    screen.IsDirty = true;
                     return;
                 }
                 keyToCheck++;
@@ -244,7 +240,6 @@ namespace RogueTutorial.UI
 
             if (keyboard.IsKeyPressed(Keys.Escape))
             {
-                screen.IsDirty = true;
                 _world.SetData(RunState.AwaitingInput);
             }
 
@@ -255,7 +250,6 @@ namespace RogueTutorial.UI
                 {
                     _player.Set(new WantsToRemoveItem() { Item = item });
                     _world.SetData(RunState.PlayerTurn);
-                    screen.IsDirty = true;
                     return;
                 }
                 keyToCheck++;
@@ -267,7 +261,6 @@ namespace RogueTutorial.UI
             if (keyboard.IsKeyPressed(Keys.Escape))
             {
                 _player.Remove<WantsToUseItem>();
-                screen.IsDirty = true;
                 _world.SetData(RunState.AwaitingInput);
             }
         }

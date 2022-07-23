@@ -12,6 +12,8 @@ using RogueTutorial.Helpers;
 using RogueSharp;
 
 using Point = SadRogue.Primitives.Point;
+using SadConsole;
+using SadRogue.Primitives;
 
 namespace RogueTutorial.Systems
 {
@@ -40,7 +42,8 @@ namespace RogueTutorial.Systems
                     {
                         canAct = false;
                         Confusion confusion = entity.Get<Confusion>();
-                        if(confusion.Turns == 1)
+                        entity.Set(new WantsCreateParticle() { LifetimeMilliseconds = 200.0f, Point = position.Point, Glyph = new ColoredGlyph(Color.Magenta, Color.Black, '?') });
+                        if (confusion.Turns == 1)
                         {
                             entity.Remove<Confusion>();
                         }
