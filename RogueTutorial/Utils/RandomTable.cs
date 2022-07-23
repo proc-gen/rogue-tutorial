@@ -19,8 +19,11 @@ namespace RogueTutorial.Utils
 
         public RandomTable Add(string name, int weight)
         {
-            _entries[name] = weight;
-            _totalWeight = _entries.Values.Sum();
+            if (weight > 0)
+            {
+                _entries[name] = weight;
+                _totalWeight = _entries.Values.Sum();
+            }
             return this;
         }
 

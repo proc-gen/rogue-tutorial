@@ -12,9 +12,13 @@ namespace RogueTutorial.Systems
 {
     internal class MeleeCombatSystem : ECSSystem
     {
+        Query equippedItemsQuery;
         public MeleeCombatSystem(World world, Query query) : base(world, query)
         {
+            equippedItemsQuery = world.CreateQuery().Has<Equipped>();
         }
+
+        
 
         public override void Run(TimeSpan delta)
         {
@@ -26,7 +30,7 @@ namespace RogueTutorial.Systems
                     if(targetStats.Hp > 0)
                     {
                         Name targetName = wantsMelee.Target.Get<Name>();
-                        int damage = Math.Max(0, stats.Power - targetStats.Defense);
+                        int damage = calculateTargetDamage(entity, wantsMelee, stats, targetStats);
 
                         if(damage > 0)
                         {
@@ -49,6 +53,39 @@ namespace RogueTutorial.Systems
 
                 entity.Remove<WantsToMelee>();
             });
+        }
+
+        private int calculateTargetDamage(Entity attacker, WantsToMelee wantsMelee, CombatStats stats, CombatStats targetStats)
+        {
+            int damage = Math.Max(0, getAttackerPower(attacker, stats) - getTargetDefense(wantsMelee.Target, targetStats));
+
+            return damage;
+        }
+
+        private int getAttackerPower(Entity attacker, CombatStats stats)
+        {
+            int power = stats.Power;
+
+            IEnumerable<Entity> meleeAttackItems = world.CreateQuery().Has<Equipped>().Has<MeleePowerBonus>().GetEntities().Where(a => a.Get<Equipped>().Owner == attacker);
+            foreach (Entity item in meleeAttackItems)
+            {
+                power += item.Get<MeleePowerBonus>().Power;
+            }
+
+            return power;
+        }
+
+        private int getTargetDefense(Entity target, CombatStats stats)
+        {
+            int defense = stats.Defense;
+
+            IEnumerable<Entity> defenseItems = world.CreateQuery().Has<Equipped>().Has<DefenseBonus>().GetEntities().Where(a => a.Get<Equipped>().Owner == target);
+            foreach (Entity item in defenseItems)
+            {
+                defense += item.Get<DefenseBonus>().Defense;
+            }
+
+            return defense;
         }
     }
 }

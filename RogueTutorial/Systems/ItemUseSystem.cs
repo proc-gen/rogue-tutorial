@@ -14,14 +14,38 @@ namespace RogueTutorial.Systems
 {
     internal class ItemUseSystem : ECSSystem
     {
+        Query equippedItemsQuery;
         public ItemUseSystem(World world, Query query) : base(world, query)
         {
+            equippedItemsQuery = world.CreateQuery().Has<Equipped>();
         }
 
         public override void Run(TimeSpan delta)
         {
             query.Foreach((in GameLog log, in Map.Map map, Entity entity, ref WantsToUseItem wantsUse, ref Name name, ref CombatStats stats) =>
             {
+                if (wantsUse.Item.Has<Equippable>())
+                {
+                    Equippable equippable = wantsUse.Item.Get<Equippable>();
+                    if (equippedItemsQuery.GetEntities().Any(a => a.Get<Equipped>().Owner == entity && a.Get<Equipped>().Slot == equippable.Slot))
+                    {
+                        Entity equippedEntity = equippedItemsQuery.GetEntities().Where(a => a.Get<Equipped>().Owner == entity && a.Get<Equipped>().Slot == equippable.Slot).First();
+                        equippedEntity.Set(new InBackpack() { Owner = entity });
+
+                        if (entity.Has<Player>())
+                        {
+                            log.Entries.Add("You unequip the " + equippedEntity.Get<Name>().EntityName);
+                        }
+                    }
+                    
+                    wantsUse.Item.Set(new Equipped() { Owner = entity, Slot = equippable.Slot });
+                    wantsUse.Item.Remove<Position>();
+
+                    if (entity.Has<Player>())
+                    {
+                        log.Entries.Add("You equip the " + wantsUse.Item.Get<Name>().EntityName);
+                    }
+                }
                 if (wantsUse.Item.Has<ProvidesHealing>())
                 {
                     ProvidesHealing healer = wantsUse.Item.Get<ProvidesHealing>();

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SadConsole;
 using RogueTutorial.Utils;
+using RogueTutorial.Helpers;
 
 namespace RogueTutorial.Map
 {
@@ -42,7 +43,11 @@ namespace RogueTutorial.Map
                         .Add("Health Potion", 7)
                         .Add("Fireball Scroll", 2 + depth)
                         .Add("Confusion Scroll", 2 + depth)
-                        .Add("Magic Missile Scroll", 4);
+                        .Add("Magic Missile Scroll", 4)
+                        .Add("Dagger", 3)
+                        .Add("Shield", 3)
+                        .Add("Long Sword", depth - 1)
+                        .Add("Tower Shield", depth - 1);
         }
 
         private static List<Point> getNonPlayerSpawnPoints(World world, Rectangle room, int depth)
@@ -103,6 +108,18 @@ namespace RogueTutorial.Map
                         break;
                     case "Magic Missile Scroll":
                         spawnMagicMissileScroll(world, spawnPoint);
+                        break;
+                    case "Dagger":
+                        spawnDagger(world, spawnPoint);
+                        break;
+                    case "Shield":
+                        spawnShield(world, spawnPoint);
+                        break;
+                    case "Long Sword":
+                        spawnLongSword(world, spawnPoint);
+                        break;
+                    case "Tower Shield":
+                        spawnTowerShield(world, spawnPoint);
                         break;
                 }
             }
@@ -174,5 +191,44 @@ namespace RogueTutorial.Map
                                         , new Confusion() { Turns = 4 });
         }
 
+        private static Entity spawnDagger(World world, Point start)
+        {
+            return world.CreateEntity(new Position() { Point = start }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Cyan, Color.Black, '/'), RenderOrder = 2 }
+                                        , new Name() { EntityName = "Dagger" }
+                                        , new Item()
+                                        , new Equippable() { Slot = EquipmentSlot.Melee }
+                                        , new MeleePowerBonus() { Power = 2 });
+        }
+
+        private static Entity spawnLongSword(World world, Point start)
+        {
+            return world.CreateEntity(new Position() { Point = start }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Yellow, Color.Black, '/'), RenderOrder = 2 }
+                                        , new Name() { EntityName = "Long Sword" }
+                                        , new Item()
+                                        , new Equippable() { Slot = EquipmentSlot.Melee }
+                                        , new MeleePowerBonus() { Power = 4 });
+        }
+
+        private static Entity spawnShield(World world, Point start)
+        {
+            return world.CreateEntity(new Position() { Point = start }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Cyan, Color.Black, '('), RenderOrder = 2 }
+                                        , new Name() { EntityName = "Shield" }
+                                        , new Item()
+                                        , new Equippable() { Slot = EquipmentSlot.Shield }
+                                        , new DefenseBonus() { Defense = 1 });
+        }
+
+        private static Entity spawnTowerShield(World world, Point start)
+        {
+            return world.CreateEntity(new Position() { Point = start }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Yellow, Color.Black, '('), RenderOrder = 2 }
+                                        , new Name() { EntityName = "Tower Shield" }
+                                        , new Item()
+                                        , new Equippable() { Slot = EquipmentSlot.Shield }
+                                        , new DefenseBonus() { Defense = 3 });
+        }
     }
 }

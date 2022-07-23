@@ -120,6 +120,9 @@ namespace RogueTutorial
             systems.Add(new ItemDropSystem(world
                                             , world.CreateQuery()
                                                 .Has<WantsToDropItem>()));
+            systems.Add(new ItemRemoveSystem(world
+                                            , world.CreateQuery()
+                                                .Has<WantsToRemoveItem>()));
             systems.Add(new VisibilitySystem(world
                                                 , world.CreateQuery()
                                                     .Has<Position>()
@@ -169,6 +172,7 @@ namespace RogueTutorial
                 case RunState.ShowDropItem:
                 case RunState.ShowTargeting:
                 case RunState.PlayerDeath:
+                case RunState.ShowRemoveItem:
                     //Do Nothing
                     break;
                 case RunState.PlayerTurn:
@@ -212,8 +216,9 @@ namespace RogueTutorial
             world.CreateQuery().Foreach((Entity entity) =>
             {
                 if (clearAll
-                    || (!entity.Has<Player>() && !entity.Has<InBackpack>())
-                    || (entity.Has<InBackpack>() && !entity.Get<InBackpack>().Owner.Has<Player>()))
+                    || (!entity.Has<Player>() && !entity.Has<InBackpack>() && !entity.Has<Equipped>())
+                    || (entity.Has<InBackpack>() && !entity.Get<InBackpack>().Owner.Has<Player>())
+                    || (entity.Has<Equipped>() && !entity.Get<Equipped>().Owner.Has<Player>()))
                 {
                     entity.Destroy();
                 }
@@ -338,6 +343,9 @@ namespace RogueTutorial
                 case RunState.PlayerDeath:
                     processKeyboardPlayerDead(keyboard);
                     break;
+                case RunState.ShowRemoveItem:
+                    processKeyboardRemoveItem(keyboard);
+                    break;
             }
 
             return true;
@@ -407,6 +415,16 @@ namespace RogueTutorial
                 Surface.IsDirty = true;
                 world.SetData(RunState.ShowInventory);
             }
+            if (keyboard.IsKeyPressed(Keys.D))
+            {
+                Surface.IsDirty = true;
+                world.SetData(RunState.ShowDropItem);
+            }
+            if (keyboard.IsKeyPressed(Keys.R))
+            {
+                Surface.IsDirty = true;
+                world.SetData(RunState.ShowRemoveItem);
+            }
             if (keyboard.IsKeyPressed(Keys.OemPeriod))
             {
                 if (tryPlayerDescend())
@@ -436,7 +454,12 @@ namespace RogueTutorial
 
         private void processKeyboardDropItem(Keyboard keyboard)
         {
-            gameGui.ProcessKeyboardInventory(keyboard, Surface);
+            gameGui.ProcessKeyboardDropItem(keyboard, Surface);
+        }
+
+        private void processKeyboardRemoveItem(Keyboard keyboard)
+        {
+            gameGui.ProcessKeyboardRemoveItem(keyboard, Surface);
         }
 
         private void processKeyboardTargetingSystem(Keyboard keyboard)
@@ -490,23 +513,32 @@ namespace RogueTutorial
             if (Surface.IsDirty)
             {
                 Surface.Clear();
-                if (world.GetData<RunState>() == RunState.MainMenu)
+                switch (world.GetData<RunState>())
                 {
-                    menuGui.Render(Surface, mousePosition);
+                    case RunState.MainMenu:
+                        menuGui.Render(Surface, mousePosition);
+                        break;
+                    case RunState.PlayerDeath:
+                        renderGameOver();
+                        break;
+                    default:
+                        renderGame();
+                        break;
                 }
-                else
-                {
-                    Map.Map map = world.GetData<Map.Map>();
-                    Entity player = playerQuery.GetEntities()[0];
-                    Viewshed playerVisibility = player.Get<Viewshed>();
 
-                    renderMap(map, playerVisibility);
-                    renderEntities(playerVisibility);
-
-                    gameGui.Render(Surface, mousePosition);
-                }
             }
             base.Render(delta);
+        }
+
+        private void renderGame()
+        {
+            Map.Map map = world.GetData<Map.Map>();
+            Entity player = playerQuery.GetEntities()[0];
+            Viewshed playerVisibility = player.Get<Viewshed>();
+
+            renderMap(map, playerVisibility);
+            renderEntities(playerVisibility);
+            gameGui.Render(Surface, mousePosition);
         }
 
         private void renderMap(Map.Map map, Viewshed playerVisibility)
@@ -559,6 +591,14 @@ namespace RogueTutorial
                     entity.Get<Renderable>().Glyph.CopyAppearanceTo(Surface[point]);
                 }
             }
+        }
+
+        private void renderGameOver()
+        {
+            Surface.Print(Surface.Width / 2 - 11, 15, "Your journey has ended!", Color.Yellow, Color.Black);
+            Surface.Print(Surface.Width / 2 - 23, 17, "One day, we'll tell you all about how you did.", Color.White, Color.Black);
+            Surface.Print(Surface.Width / 2 - 21, 18, "That day, sadly, is not in this chapter...", Color.White, Color.Black);
+            Surface.Print(Surface.Width / 2 - 20, 20, "Press any key to return to the main menu.", Color.Magenta, Color.Black);
         }
     }
 }

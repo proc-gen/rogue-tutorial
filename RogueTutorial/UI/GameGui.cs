@@ -22,6 +22,7 @@ namespace RogueTutorial.UI
         private Query _tooltipQuery;
         private Query _inventoryQuery;
         private Query _itemForTargetQuery;
+        private Query _equippedItemsQuery;
         public GameGui(World world, Query playerQuery)
         {
             _world = world;
@@ -33,6 +34,8 @@ namespace RogueTutorial.UI
                                 .Has<InBackpack>();
             _itemForTargetQuery = world.CreateQuery()
                                    .Has<UseForTargeting>();
+            _equippedItemsQuery = world.CreateQuery()
+                                .Has<Equipped>();
         }
 
         public void Render(ICellSurface screen, Point? mousePosition)
@@ -51,6 +54,9 @@ namespace RogueTutorial.UI
                     break;
                 case RunState.ShowTargeting:
                     drawTargetingSystem(screen, mousePosition);
+                    break;
+                case RunState.ShowRemoveItem:
+                    drawEquippedItems(screen);
                     break;
                 default:
                     drawTooltips(screen, mousePosition);
@@ -153,9 +159,36 @@ namespace RogueTutorial.UI
             }
         }
 
+        private void drawEquippedItems(ICellSurface screen)
+        {
+            IEnumerable<Entity> equippedItems = getEquippedItems(_player);
+
+            int y = 25 - (equippedItems.Count() / 2);
+            screen.DrawRLTKStyleBox(15, y - 2, 31, equippedItems.Count() + 3, Color.White, Color.Black);
+            screen.Print(18, y - 2, "Remove Which Item?", Color.Yellow, Color.Black);
+            screen.Print(18, y + equippedItems.Count() + 1, "ESCAPE to cancel", Color.Yellow, Color.Black);
+
+            int i = 0;
+            foreach (Entity item in equippedItems)
+            {
+                char c = (char)(64 + (i + 1));
+                screen.Print(17, y + i, "(", Color.White, Color.Black);
+                screen.Print(18, y + i, c.ToString(), Color.Yellow, Color.Black);
+                screen.Print(19, y + i, ")", Color.White, Color.Black);
+                screen.Print(21, y + i, item.Get<Name>().EntityName, Color.White, Color.Black);
+                i++;
+            }
+        }
+
         private IEnumerable<Entity> getInventoryItems(Entity owner)
         {
             IEnumerable<Entity> inventoryItems = _inventoryQuery.GetEntities().Where(a => a.Get<InBackpack>().Owner == owner).OrderBy(a => a.index).ThenBy(a => a.version);
+            return inventoryItems;
+        }
+
+        private IEnumerable<Entity> getEquippedItems(Entity owner)
+        {
+            IEnumerable<Entity> inventoryItems = _equippedItemsQuery.GetEntities().Where(a => a.Get<Equipped>().Owner == owner).OrderBy(a => a.index).ThenBy(a => a.version);
             return inventoryItems;
         }
 
@@ -199,6 +232,30 @@ namespace RogueTutorial.UI
                 if (keyboard.IsKeyPressed(keyToCheck))
                 {
                     _player.Set(new WantsToDropItem() { Item = item });
+                    _world.SetData(RunState.PlayerTurn);
+                    screen.IsDirty = true;
+                    return;
+                }
+                keyToCheck++;
+            }
+        }
+
+        public void ProcessKeyboardRemoveItem(Keyboard keyboard, ICellSurface screen)
+        {
+            IEnumerable<Entity> equippedItems = getEquippedItems(_player);
+
+            if (keyboard.IsKeyPressed(Keys.Escape))
+            {
+                screen.IsDirty = true;
+                _world.SetData(RunState.AwaitingInput);
+            }
+
+            Keys keyToCheck = Keys.A;
+            foreach (Entity item in equippedItems)
+            {
+                if (keyboard.IsKeyPressed(keyToCheck))
+                {
+                    _player.Set(new WantsToRemoveItem() { Item = item });
                     _world.SetData(RunState.PlayerTurn);
                     screen.IsDirty = true;
                     return;
