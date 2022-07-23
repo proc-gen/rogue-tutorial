@@ -48,7 +48,8 @@ namespace RogueTutorial.Map
                         .Add("Shield", 3)
                         .Add("Long Sword", depth - 1)
                         .Add("Tower Shield", depth - 1)
-                        .Add("Rations", 10);
+                        .Add("Rations", 10)
+                        .Add("Magic Mapping Scroll", 2);
         }
 
         private static List<Point> getNonPlayerSpawnPoints(World world, Rectangle room, int depth)
@@ -124,6 +125,9 @@ namespace RogueTutorial.Map
                         break;
                     case "Rations":
                         spawnRations(world, spawnPoint);
+                        break;
+                    case "Magic Mapping Scroll":
+                        spawnMagicMappingScroll(world, spawnPoint);
                         break;
                 }
             }
@@ -242,6 +246,16 @@ namespace RogueTutorial.Map
                                         , new Name() { EntityName = "Rations" }
                                         , new Item()
                                         , new ProvidesFood()
+                                        , new Consumable());
+        }
+
+        private static Entity spawnMagicMappingScroll(World world, Point start)
+        {
+            return world.CreateEntity(new Position() { Point = start }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.AnsiCyanBright, Color.Black, ')'), RenderOrder = 2 }
+                                        , new Name() { EntityName = "Scroll of Magic Mapping" }
+                                        , new Item()
+                                        , new MagicMapper()
                                         , new Consumable());
         }
     }

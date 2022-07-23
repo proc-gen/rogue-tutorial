@@ -28,6 +28,7 @@ namespace RogueTutorial
         List<ECSSystem> systems;
         ParticleRemovalSystem particleRemovalSystem;
         Point? mousePosition;
+        int magicMapRow = 0;
 
         public RootScreen(int width, int height)
             : base(width, height)
@@ -156,6 +157,10 @@ namespace RogueTutorial
                     {
                         world.SetData(RunState.MonsterTurn);
                     }
+                    else if(world.GetData<RunState>() == RunState.MagicMapReveal)
+                    {
+                        magicMapRow = 0;
+                    }
                     break;
                 case RunState.MonsterTurn:
                     runSystems(delta);
@@ -173,10 +178,31 @@ namespace RogueTutorial
                     runSystems(delta);
                     world.SetData(RunState.AwaitingInput);
                     break;
+                case RunState.MagicMapReveal:
+                    magicMapReveal();
+                    break;
             }
 
 
             base.Update(delta);
+        }
+
+        private void magicMapReveal()
+        {
+            Map.Map map = world.GetData<Map.Map>();
+
+            if (magicMapRow < map.Height)
+            {
+                for (int i = 0; i < map.Width; i++)
+                {
+                    map.SetMapCellExplored(i, magicMapRow);
+                }
+                magicMapRow++;
+            }
+            else
+            {
+                world.SetData(RunState.MonsterTurn);
+            }
         }
 
         private void saveGameData()

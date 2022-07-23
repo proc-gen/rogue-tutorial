@@ -212,6 +212,9 @@ namespace RogueTutorial.Utils
                 case "ProvidesFood":
                     component = new ProvidesFood();
                     break;
+                case "MagicMapper":
+                    component = new MagicMapper();
+                    break;
             }
             return component;
         }
@@ -286,6 +289,9 @@ namespace RogueTutorial.Utils
                     break;
                 case "ProvidesFood":
                     type = typeof(ProvidesFood);
+                    break;
+                case "MagicMapper":
+                    type = typeof(MagicMapper);
                     break;
             }
             return type;

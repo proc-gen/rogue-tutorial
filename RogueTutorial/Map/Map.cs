@@ -113,6 +113,11 @@ namespace RogueTutorial.Map
             return map.IsExplored(x, y);
         }
 
+        public void SetMapCellExplored(int x, int y)
+        {
+            updateCellVisibility(x, y, true);
+        }
+
         public Path FindPath(Point start, Point end)
         {
             ICell oldStartCell = map.GetCell(start.X, start.Y);

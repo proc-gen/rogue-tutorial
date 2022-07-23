@@ -84,6 +84,15 @@ namespace RogueTutorial.Systems
                         wantsUse.Item.Get<Consumable>().Consumed = true;
                     }
                 }
+                else if (wantsUse.Item.Has<MagicMapper>())
+                {
+                    log.Entries.Add("The map is revealed to you!");
+                    world.SetData(RunState.MagicMapReveal);
+                    if (wantsUse.Item.Has<Consumable>())
+                    {
+                        wantsUse.Item.Get<Consumable>().Consumed = true;
+                    }
+                }
                 else if (wantsUse.Item.Has<Ranged>())
                 {
                     if (wantsUse.Target.HasValue)
