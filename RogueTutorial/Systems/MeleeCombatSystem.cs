@@ -14,7 +14,9 @@ namespace RogueTutorial.Systems
     {
         Query equippedMeleeAttackItems,
                 equippedDefenseItems;
-        public MeleeCombatSystem(World world, Query query) : base(world, query)
+        public MeleeCombatSystem(World world) 
+            : base(world, world.CreateQuery()
+                                .Has<WantsToMelee>())
         {
             equippedMeleeAttackItems = world.CreateQuery().Has<Equipped>().Has<MeleePowerBonus>();
             equippedDefenseItems = world.CreateQuery().Has<Equipped>().Has<DefenseBonus>();

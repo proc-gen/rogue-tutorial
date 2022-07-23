@@ -13,7 +13,9 @@ namespace RogueTutorial.Systems
     internal class ItemCollectionSystem : ECSSystem
     {
         Query equippedItemsQuery;
-        public ItemCollectionSystem(World world, Query query) : base(world, query)
+        public ItemCollectionSystem(World world) 
+            : base(world, world.CreateQuery()
+                                .Has<WantsToPickupItem>())
         {
             equippedItemsQuery = world.CreateQuery().Has<Equipped>();
         }

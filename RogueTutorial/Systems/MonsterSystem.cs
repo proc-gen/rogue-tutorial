@@ -17,15 +17,17 @@ namespace RogueTutorial.Systems
 {
     internal class MonsterSystem : ECSSystem
     {
-        private Query playerQuery;
-        public MonsterSystem(World world, Query query, Query playerQuery) : base(world, query)
+        public MonsterSystem(World world) 
+            : base(world, world.CreateQuery()
+                                .Has<Position>()
+                                .Has<Viewshed>()
+                                .Has<Monster>())
         {
-            this.playerQuery = playerQuery;
         }
 
         public override void Run(TimeSpan delta)
         {
-            Entity player = playerQuery.GetEntities()[0];
+            Entity player = PlayerFunctions.GetPlayer(world);
             Position playerPosition = player.Get<Position>();
             RunState runState = world.GetData<RunState>();
 

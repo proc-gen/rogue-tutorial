@@ -12,7 +12,9 @@ namespace RogueTutorial.Systems
 {
     internal class DeleteTheDead : ECSSystem
     {
-        public DeleteTheDead(World world, Query query) : base(world, query)
+        public DeleteTheDead(World world) 
+            : base(world, world.CreateQuery()
+                                .Has<CombatStats>())
         {
         }
 

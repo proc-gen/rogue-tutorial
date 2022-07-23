@@ -11,7 +11,9 @@ namespace RogueTutorial.Systems
 {
     internal class DamageSystem : ECSSystem
     {
-        public DamageSystem(World world, Query query) : base(world, query)
+        public DamageSystem(World world) 
+            : base(world, world.CreateQuery()
+                                .Has<SufferDamage>())
         {
         }
 

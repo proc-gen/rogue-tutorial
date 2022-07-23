@@ -13,7 +13,9 @@ namespace RogueTutorial.Systems
 {
     internal class ItemDropSystem : ECSSystem
     {
-        public ItemDropSystem(World world, Query query) : base(world, query)
+        public ItemDropSystem(World world) 
+            : base(world, world.CreateQuery()
+                                .Has<WantsToDropItem>())
         {
         }
 

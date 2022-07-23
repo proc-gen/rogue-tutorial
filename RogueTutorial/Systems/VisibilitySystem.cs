@@ -7,23 +7,24 @@ using System.Threading.Tasks;
 
 using RogueTutorial.Map;
 using RogueTutorial.Components;
+using RogueTutorial.Helpers;
 
 namespace RogueTutorial.Systems
 {
     internal class VisibilitySystem : ECSSystem
     {
-        private Query playerQuery;
-        public VisibilitySystem(World world, Query query, Query playerQuery) : base(world, query)
+        public VisibilitySystem(World world) 
+            : base(world, world.CreateQuery()
+                                .Has<Position>()
+                                .Has<Viewshed>())
         {
-            this.playerQuery = playerQuery;
         }
 
         public override void Run(TimeSpan delta)
         {
-            Map.Map map = world.GetData<Map.Map>();
-            Entity player = playerQuery.GetEntities()[0];
+            Entity player = PlayerFunctions.GetPlayer(world);
 
-            query.Foreach((Entity entity, ref Viewshed visibility, ref Position position) => 
+            query.Foreach((in Map.Map map, Entity entity, ref Viewshed visibility, ref Position position) => 
             {
                 if (visibility.Dirty)
                 {

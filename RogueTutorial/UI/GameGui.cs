@@ -17,16 +17,14 @@ namespace RogueTutorial.UI
     internal class GameGui
     {
         private World _world;
-        private Entity _player { get { return _playerQuery.GetEntities()[0]; } }
-        private Query _playerQuery;
+        private Entity _player { get { return PlayerFunctions.GetPlayer(_world); } }
         private Query _tooltipQuery;
         private Query _inventoryQuery;
         private Query _itemForTargetQuery;
         private Query _equippedItemsQuery;
-        public GameGui(World world, Query playerQuery)
+        public GameGui(World world)
         {
             _world = world;
-            _playerQuery = playerQuery;
             _tooltipQuery = world.CreateQuery()
                                 .Has<Position>()
                                 .Has<Name>();

@@ -11,7 +11,9 @@ namespace RogueTutorial.Systems
 {
     internal class ItemConsumedSystem : ECSSystem
     {
-        public ItemConsumedSystem(World world, Query query) : base(world, query)
+        public ItemConsumedSystem(World world) 
+            : base(world, world.CreateQuery()
+                                .Has<WantsToUseItem>())
         {
         }
 

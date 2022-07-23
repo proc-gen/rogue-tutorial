@@ -13,7 +13,10 @@ namespace RogueTutorial.Systems
 {
     internal class ItemRemoveSystem : ECSSystem
     {
-        public ItemRemoveSystem(World world, Query query) : base(world, query)
+        public ItemRemoveSystem(World world) 
+            : base(world, world.CreateQuery()
+                                .Has<Position>()
+                                .Has<Viewshed>())
         {
         }
 
