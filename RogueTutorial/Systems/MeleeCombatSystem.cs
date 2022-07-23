@@ -12,13 +12,13 @@ namespace RogueTutorial.Systems
 {
     internal class MeleeCombatSystem : ECSSystem
     {
-        Query equippedItemsQuery;
+        Query equippedMeleeAttackItems,
+                equippedDefenseItems;
         public MeleeCombatSystem(World world, Query query) : base(world, query)
         {
-            equippedItemsQuery = world.CreateQuery().Has<Equipped>();
+            equippedMeleeAttackItems = world.CreateQuery().Has<Equipped>().Has<MeleePowerBonus>();
+            equippedDefenseItems = world.CreateQuery().Has<Equipped>().Has<DefenseBonus>();
         }
-
-        
 
         public override void Run(TimeSpan delta)
         {
@@ -66,7 +66,7 @@ namespace RogueTutorial.Systems
         {
             int power = stats.Power;
 
-            IEnumerable<Entity> meleeAttackItems = world.CreateQuery().Has<Equipped>().Has<MeleePowerBonus>().GetEntities().Where(a => a.Get<Equipped>().Owner == attacker);
+            IEnumerable<Entity> meleeAttackItems = equippedMeleeAttackItems.GetEntities().Where(a => a.Get<Equipped>().Owner == attacker);
             foreach (Entity item in meleeAttackItems)
             {
                 power += item.Get<MeleePowerBonus>().Power;
@@ -79,7 +79,7 @@ namespace RogueTutorial.Systems
         {
             int defense = stats.Defense;
 
-            IEnumerable<Entity> defenseItems = world.CreateQuery().Has<Equipped>().Has<DefenseBonus>().GetEntities().Where(a => a.Get<Equipped>().Owner == target);
+            IEnumerable<Entity> defenseItems = equippedDefenseItems.GetEntities().Where(a => a.Get<Equipped>().Owner == target);
             foreach (Entity item in defenseItems)
             {
                 defense += item.Get<DefenseBonus>().Defense;
