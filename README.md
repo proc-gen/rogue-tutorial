@@ -13,9 +13,11 @@ Libraries In Use:
  
 Completed:
  - Section 2 - Hello Rust (7/23/2022)
+ - Section 3.1 - Nice Walls with Bitsets
+ - Section 3.2 - Bloodstains
 
 In Progress
- - Section 3.1 - Nice Walls with Bitsets
+ - Section 3.3 - Particle Effects
 
 Other Notes
  - Section 2.7 - User Interface
