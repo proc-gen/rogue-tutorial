@@ -13,7 +13,7 @@ using RogueTutorial.Utils;
 
 namespace RogueTutorial.Map
 {
-    internal class Map : ISaveable
+    public class Map : ISaveable
     {
         private TileType[] _mapGrid;
         private bool[] _blocked;
@@ -45,6 +45,16 @@ namespace RogueTutorial.Map
         public TileType GetMapCell(int x, int y)
         {
             return _mapGrid[y * Width + x];
+        }
+
+        public bool CellRevealedAndIsWall(int x, int y)
+        {
+            bool retVal = false;
+            if(x >=0 && y >= 0 && x < Width && y < Height)
+            {
+                retVal = GetMapCell(x, y) == TileType.Wall && IsMapCellExplored(x, y);
+            }
+            return retVal;
         }
 
         public void SetMapCell(int x, int y, TileType tileType)

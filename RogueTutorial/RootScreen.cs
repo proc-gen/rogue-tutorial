@@ -449,7 +449,7 @@ namespace RogueTutorial
                                 TileGlyphs.FloorVisible.CopyAppearanceTo(Surface[i, j]);
                                 break;
                             case TileType.Wall:
-                                TileGlyphs.WallVisible.CopyAppearanceTo(Surface[i, j]);
+                                TileGlyphs.GetWallGlyph(map, i, j, true).CopyAppearanceTo(Surface[i, j]);
                                 break;
                             case TileType.DownStairs:
                                 TileGlyphs.DownStairsVisible.CopyAppearanceTo(Surface[i, j]);
@@ -464,7 +464,7 @@ namespace RogueTutorial
                                 TileGlyphs.Floor.CopyAppearanceTo(Surface[i, j]);
                                 break;
                             case TileType.Wall:
-                                TileGlyphs.Wall.CopyAppearanceTo(Surface[i, j]);
+                                TileGlyphs.GetWallGlyph(map, i, j, false).CopyAppearanceTo(Surface[i, j]);
                                 break;
                             case TileType.DownStairs:
                                 TileGlyphs.DownStairs.CopyAppearanceTo(Surface[i, j]);
