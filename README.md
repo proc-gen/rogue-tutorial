@@ -13,11 +13,15 @@ Libraries In Use:
  
 Completed:
  - Section 2 - Hello Rust (7/23/2022)
- - Section 3.1 - Nice Walls with Bitsets
- - Section 3.2 - Bloodstains
+ - Section 3.1 - Nice Walls with Bitsets (7/23/2022)
+ - Section 3.2 - Bloodstains (7/23/2022)
+ - Section 3.3 - Particle Effects (7/23/2022)
+ - Section 3.4 - Hunger Clock (7/23/2022)
+ - Section 3.5 - Magic Mapping (7/23/2022)
+ - *Section 3.6 - REX Paint Menu SKIPPED*
 
 In Progress
- - Section 3.3 - Particle Effects
+ - Section 3.7 - Simple Traps
 
 Other Notes
  - Section 2.7 - User Interface
@@ -31,4 +35,8 @@ Other Notes
      - This section would have been very straightforward if the Entity struct provided by SimpleECS was easily serializable. Of course, this wasn't the case and meant either finding a new library after writing so much code or writing my own Save/Load code. I opted for the latter because it was more tedious than anything else and not computationally difficult. 
  - Section 2.13 - Equipment
    - SimpleECS Oddities
-     - I'm not sure what caused this to happen, but the equipped entities query for the melee combat system would not work unless it was instantiated in the function using it for calculations. If the query was instantiated at system creation, it wasn't picking up any of the entities that it was supposed to find.'
+     - I'm not sure what caused this to happen, but the equipped entities query for the melee combat system would not work unless it was instantiated in the function using it for calculations. If the query was instantiated at system creation, it wasn't picking up any of the entities that it was supposed to find.
+ - Section 3.6
+   - Everything
+     - Like the Post-Process Scanlines feature from before, loading the REX Paint image is something I may come back to later.
+     - I already have the code accounting for proper spacing depending on which menu options are visible, so there's nothing left to accomplish for this section.
