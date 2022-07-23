@@ -12,22 +12,43 @@ namespace RogueTutorial.Systems
 {
     internal class ItemCollectionSystem : ECSSystem
     {
+        Query equippedItemsQuery;
         public ItemCollectionSystem(World world, Query query) : base(world, query)
         {
+            equippedItemsQuery = world.CreateQuery().Has<Equipped>();
         }
 
         public override void Run(TimeSpan delta)
         {
             query.Foreach((in GameLog log, Entity entity, ref WantsToPickupItem wantsPickup) =>
             {
-                wantsPickup.Item.Set(new InBackpack() { Owner = wantsPickup.CollectedBy });
-                wantsPickup.Item.Remove<Position>();
-
-                if (wantsPickup.CollectedBy.Has<Player>())
+                bool pickedUp = false;
+                if (wantsPickup.Item.Has<Equippable>())
                 {
-                    log.Entries.Add("You pick up the " + wantsPickup.Item.Get<Name>().EntityName);
+                    Equippable equippable = wantsPickup.Item.Get<Equippable>();
+                    if(!equippedItemsQuery.GetEntities().Any(a => a.Get<Equipped>().Owner == entity && a.Get<Equipped>().Slot == equippable.Slot))
+                    {
+                        wantsPickup.Item.Set(new Equipped() { Owner = wantsPickup.CollectedBy, Slot = equippable.Slot });
+                        wantsPickup.Item.Remove<Position>();
+
+                        if (wantsPickup.CollectedBy.Has<Player>())
+                        {
+                            log.Entries.Add("You equip the " + wantsPickup.Item.Get<Name>().EntityName);
+                        }
+                        pickedUp = true;
+                    }
                 }
 
+                if (!pickedUp)
+                {
+                    wantsPickup.Item.Set(new InBackpack() { Owner = wantsPickup.CollectedBy });
+                    wantsPickup.Item.Remove<Position>();
+
+                    if (wantsPickup.CollectedBy.Has<Player>())
+                    {
+                        log.Entries.Add("You pick up the " + wantsPickup.Item.Get<Name>().EntityName);
+                    }
+                }
                 entity.Remove<WantsToPickupItem>();
             });
         }
@@ -37,7 +58,7 @@ namespace RogueTutorial.Systems
             int status = 0;
             Position collectorPosition = collector.Get<Position>();
             IEnumerable<Entity> items = world.CreateQuery()
-                                .Has<Item>().GetEntities()
+                                .Has<Item>().Has<Position>().GetEntities()
                                 .Where(a => a.IsValid() && a.Get<Position>().Point == collectorPosition.Point);
 
             if(items.Any())

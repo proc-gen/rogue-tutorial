@@ -20,5 +20,6 @@ namespace RogueTutorial.Helpers
         LoadGame,
         NextLevel,
         PlayerDeath,
+        ShowRemoveItem
     }
 }
