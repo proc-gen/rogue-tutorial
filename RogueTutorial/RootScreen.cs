@@ -103,6 +103,7 @@ namespace RogueTutorial
             systems = new List<ECSSystem>()
             {
                 new MonsterSystem(world),
+                new TriggerSystem(world),
                 new ItemUseSystem(world),
                 new ItemConsumedSystem(world),
                 new ItemDropSystem(world),
@@ -517,14 +518,17 @@ namespace RogueTutorial
                 Point point = entity.Get<Position>().Point;
                 if(playerVisibility.VisibleTiles.Any(a => a == point))
                 {
-                    if (entity.TryGet(out ParticleLifetime particleLifetime) 
-                        && particleLifetime.LifetimeMilliseconds > 0)
+                    if (!entity.Has<Hidden>())
                     {
-                        entity.Get<Renderable>().Glyph.CopyAppearanceTo(Surface[point]);
-                    }
-                    else
-                    {
-                        entity.Get<Renderable>().Glyph.CopyAppearanceTo(Surface[point]);
+                        if (entity.TryGet(out ParticleLifetime particleLifetime)
+                            && particleLifetime.LifetimeMilliseconds > 0)
+                        {
+                            entity.Get<Renderable>().Glyph.CopyAppearanceTo(Surface[point]);
+                        }
+                        else
+                        {
+                            entity.Get<Renderable>().Glyph.CopyAppearanceTo(Surface[point]);
+                        }
                     }
                 }
             }

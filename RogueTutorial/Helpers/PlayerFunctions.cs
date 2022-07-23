@@ -36,7 +36,7 @@ namespace RogueTutorial.Helpers
                 map.SetCellWalkable(position.PreviousPoint.X, position.PreviousPoint.Y, true);
                 map.SetCellWalkable(position.Point.X, position.Point.Y, false);
                 position.Dirty = false;
-
+                player.Set(new EntityMoved());
                 retVal = true;
             }
             else

@@ -49,7 +49,8 @@ namespace RogueTutorial.Map
                         .Add("Long Sword", depth - 1)
                         .Add("Tower Shield", depth - 1)
                         .Add("Rations", 10)
-                        .Add("Magic Mapping Scroll", 2);
+                        .Add("Magic Mapping Scroll", 2)
+                        .Add("Bear Trap", 2);
         }
 
         private static List<Point> getNonPlayerSpawnPoints(World world, Rectangle room, int depth)
@@ -128,6 +129,9 @@ namespace RogueTutorial.Map
                         break;
                     case "Magic Mapping Scroll":
                         spawnMagicMappingScroll(world, spawnPoint);
+                        break;
+                    case "Bear Trap":
+                        spawnBearTrap(world, spawnPoint);
                         break;
                 }
             }
@@ -257,6 +261,17 @@ namespace RogueTutorial.Map
                                         , new Item()
                                         , new MagicMapper()
                                         , new Consumable());
+        }
+
+        private static Entity spawnBearTrap(World world, Point start)
+        {
+            return world.CreateEntity(new Position() { Point = start }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Red, Color.Black, '^'), RenderOrder = 2 }
+                                        , new Name() { EntityName = "Bear Trap" }
+                                        , new Hidden()
+                                        , new EntryTrigger()
+                                        , new InflictsDamage() { Damage = 6 }
+                                        , new SingleActivation());
         }
     }
 }

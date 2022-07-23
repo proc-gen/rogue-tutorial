@@ -105,7 +105,7 @@ namespace RogueTutorial.UI
             {
                 screen.SetGlyph(mousePosition.Value.X, mousePosition.Value.Y, 176, Color.Magenta);
 
-                if(_tooltipQuery.GetEntities().Any(a => _player.Get<Viewshed>().VisibleTiles.Any(b => b == a.Get<Position>().Point) && a.Get<Position>().Point == mousePosition.Value))
+                if(_tooltipQuery.GetEntities().Any(a => _player.Get<Viewshed>().VisibleTiles.Any(b => b == a.Get<Position>().Point) && a.Get<Position>().Point == mousePosition.Value && !a.Has<Hidden>()))
                 {
                     Entity entity = _tooltipQuery.GetEntities().First(a => a.Get<Position>().Point == mousePosition.Value);
                     string toolTip = entity.Get<Name>().EntityName;

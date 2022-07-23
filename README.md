@@ -19,9 +19,10 @@ Completed:
  - Section 3.4 - Hunger Clock (7/23/2022)
  - Section 3.5 - Magic Mapping (7/23/2022)
  - *Section 3.6 - REX Paint Menu SKIPPED*
+ - Section 3.7 - Simple Traps (7/23/2022)
 
 In Progress
- - Section 3.7 - Simple Traps
+ - Nothing Yet
 
 Other Notes
  - Section 2.7 - User Interface

@@ -75,6 +75,7 @@ namespace RogueTutorial.Systems
                                             visibility.Dirty = true;
                                             map.SetCellWalkable(position.PreviousPoint.X, position.PreviousPoint.Y, true);
                                             map.SetCellWalkable(position.Point.X, position.Point.Y, false);
+                                            entity.Set(new EntityMoved());
                                             position.Dirty = false;
                                         }
                                     }

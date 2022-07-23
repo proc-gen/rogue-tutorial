@@ -215,6 +215,18 @@ namespace RogueTutorial.Utils
                 case "MagicMapper":
                     component = new MagicMapper();
                     break;
+                case "Hidden":
+                    component = new Hidden();
+                    break;
+                case "EntryTrigger":
+                    component = new EntryTrigger();
+                    break;
+                case "EntityMoved":
+                    component = new EntityMoved();
+                    break;
+                case "SingleActivation":
+                    component = new SingleActivation();
+                    break;
             }
             return component;
         }
@@ -292,6 +304,18 @@ namespace RogueTutorial.Utils
                     break;
                 case "MagicMapper":
                     type = typeof(MagicMapper);
+                    break;
+                case "Hidden":
+                    type = typeof(Hidden);
+                    break;
+                case "EntryTrigger":
+                    type = typeof(EntryTrigger);
+                    break;
+                case "EntityMoved":
+                    type = typeof(EntityMoved);
+                    break;
+                case "SingleActivation":
+                    type = typeof(SingleActivation);
                     break;
             }
             return type;

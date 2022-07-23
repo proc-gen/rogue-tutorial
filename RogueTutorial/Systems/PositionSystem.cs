@@ -22,7 +22,7 @@ namespace RogueTutorial.Systems
         {
             world.GetData<Map.Map>().ResetTileContent();
 
-            query.Foreach((in Map.Map map, Entity entity, ref Position position, ref BlocksTile blocksTile) =>
+            query.Foreach((in Map.Map map, Entity entity, ref Position position) =>
             {
                 map.AddCellEntity(entity, position.Point);
             });
