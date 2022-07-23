@@ -9,6 +9,7 @@ using RogueTutorial.Components;
 using RogueTutorial.Helpers;
 
 using SadRogue.Primitives;
+using SadConsole;
 
 namespace RogueTutorial.Systems
 {
@@ -51,16 +52,42 @@ namespace RogueTutorial.Systems
                         log.Entries.Add("You equip the " + wantsUse.Item.Get<Name>().EntityName);
                     }
                 }
-                if (wantsUse.Item.Has<ProvidesHealing>())
+                else if (wantsUse.Item.Has<ProvidesHealing>())
                 {
                     ProvidesHealing healer = wantsUse.Item.Get<ProvidesHealing>();
                     stats.Hp = Math.Min(stats.MaxHp, stats.Hp + healer.HealAmount);
+                    entity.Set(new WantsCreateParticle() { LifetimeMilliseconds = 200.0f, Point = entity.Get<Position>().Point, Glyph = new ColoredGlyph(Color.Green, Color.Black, 3) });
 
                     if (entity.Has<Player>())
                     {
                         log.Entries.Add("You use the " + wantsUse.Item.Get<Name>().EntityName + ", healing " + healer.HealAmount + " hp.");
                     }
 
+                    if (wantsUse.Item.Has<Consumable>())
+                    {
+                        wantsUse.Item.Get<Consumable>().Consumed = true;
+                    }
+                }
+                else if (wantsUse.Item.Has<ProvidesFood>())
+                {
+                    HungerClock hungerClock = entity.Get<HungerClock>();
+                    hungerClock.Duration = 20;
+                    hungerClock.State = HungerState.WellFed;
+
+                    if (entity.Has<Player>())
+                    {
+                        log.Entries.Add("You eat the " + wantsUse.Item.Get<Name>().EntityName + ".");
+                    }
+
+                    if (wantsUse.Item.Has<Consumable>())
+                    {
+                        wantsUse.Item.Get<Consumable>().Consumed = true;
+                    }
+                }
+                else if (wantsUse.Item.Has<MagicMapper>())
+                {
+                    log.Entries.Add("The map is revealed to you!");
+                    world.SetData(RunState.MagicMapReveal);
                     if (wantsUse.Item.Has<Consumable>())
                     {
                         wantsUse.Item.Get<Consumable>().Consumed = true;
@@ -74,6 +101,7 @@ namespace RogueTutorial.Systems
                         if (wantsUse.Item.Has<AreaOfEffect>())
                         {
                             targetCells.AddRange(map.ComputeFOV(wantsUse.Target.Value.X, wantsUse.Target.Value.Y, wantsUse.Item.Get<AreaOfEffect>().Radius, false, false));
+                            entity.Set(new WantsCreateParticle() { LifetimeMilliseconds = 200.0f, Point = wantsUse.Target.Value, AdditionalPoints = targetCells, Glyph = new ColoredGlyph(Color.Orange, Color.Black, 177) });
                         }
                         else
                         {
@@ -94,6 +122,8 @@ namespace RogueTutorial.Systems
                                 InflictsDamage inflicts = wantsUse.Item.Get<InflictsDamage>();
                                 foreach (Entity target in targets)
                                 {
+                                    target.Set(new WantsCreateParticle() { LifetimeMilliseconds = 200.0f, Point = target.Get<Position>().Point, Glyph = new ColoredGlyph(Color.Orange, Color.Black, 19) });
+
                                     SufferDamage targetDamage = null;
                                     if (!target.TryGet(out targetDamage))
                                     {
@@ -111,6 +141,8 @@ namespace RogueTutorial.Systems
                                 Confusion confusion = wantsUse.Item.Get<Confusion>();
                                 foreach(Entity target in targets)
                                 {
+                                    entity.Set(new WantsCreateParticle() { LifetimeMilliseconds = 200.0f, Point = target.Get<Position>().Point, Glyph = new ColoredGlyph(Color.Magenta, Color.Black, '?') });
+
                                     Confusion targetConfusion = null;
                                     if (!target.TryGet(out targetConfusion))
                                     {

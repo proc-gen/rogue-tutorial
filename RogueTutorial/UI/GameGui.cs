@@ -65,9 +65,27 @@ namespace RogueTutorial.UI
         private void drawPlayerStats(ICellSurface screen)
         {
             CombatStats playerStats = _player.Get<CombatStats>();
+            HungerClock hungerClock = _player.Get<HungerClock>();
+
             screen.Print(2, 39, "Depth: " + _world.GetData<Map.Map>().Depth, Color.Yellow, Color.Black);
             screen.Print(12, 39, " HP: " + playerStats.Hp + " / " + playerStats.MaxHp + " ", Color.Yellow, Color.Black);
             screen.DrawRLTKHorizontalBar(28, 39, 51, playerStats.Hp, playerStats.MaxHp, Color.Red, Color.Black);
+
+            switch (hungerClock.State)
+            {
+                case HungerState.WellFed:
+                    screen.Print(71, 38, "Well Fed", Color.Green, Color.Black);
+                    break;
+                case HungerState.Normal:
+                    break;
+                case HungerState.Hungry:
+                    screen.Print(71, 38, "Hungry", Color.Orange, Color.Black);
+                    break;
+                case HungerState.Starving:
+                    screen.Print(71, 38, "Starving", Color.Red, Color.Black);
+                    break;
+
+            }
         }
 
         private void drawGameLog(ICellSurface screen)
@@ -87,7 +105,7 @@ namespace RogueTutorial.UI
             {
                 screen.SetGlyph(mousePosition.Value.X, mousePosition.Value.Y, 176, Color.Magenta);
 
-                if(_tooltipQuery.GetEntities().Any(a => _player.Get<Viewshed>().VisibleTiles.Any(b => b == a.Get<Position>().Point) && a.Get<Position>().Point == mousePosition.Value))
+                if(_tooltipQuery.GetEntities().Any(a => _player.Get<Viewshed>().VisibleTiles.Any(b => b == a.Get<Position>().Point) && a.Get<Position>().Point == mousePosition.Value && !a.Has<Hidden>()))
                 {
                     Entity entity = _tooltipQuery.GetEntities().First(a => a.Get<Position>().Point == mousePosition.Value);
                     string toolTip = entity.Get<Name>().EntityName;
@@ -196,7 +214,6 @@ namespace RogueTutorial.UI
 
             if (keyboard.IsKeyPressed(Keys.Escape))
             {
-                screen.IsDirty = true;
                 _world.SetData(RunState.AwaitingInput);
             }
 
@@ -207,7 +224,6 @@ namespace RogueTutorial.UI
                 {
                     _player.Set(new WantsToUseItem() { Item = item });
                     _world.SetData(RunState.PlayerTurn);
-                    screen.IsDirty = true;
                     return;
                 }
                 keyToCheck++;
@@ -220,7 +236,6 @@ namespace RogueTutorial.UI
 
             if (keyboard.IsKeyPressed(Keys.Escape))
             {
-                screen.IsDirty = true;
                 _world.SetData(RunState.AwaitingInput);
             }
 
@@ -231,7 +246,6 @@ namespace RogueTutorial.UI
                 {
                     _player.Set(new WantsToDropItem() { Item = item });
                     _world.SetData(RunState.PlayerTurn);
-                    screen.IsDirty = true;
                     return;
                 }
                 keyToCheck++;
@@ -244,7 +258,6 @@ namespace RogueTutorial.UI
 
             if (keyboard.IsKeyPressed(Keys.Escape))
             {
-                screen.IsDirty = true;
                 _world.SetData(RunState.AwaitingInput);
             }
 
@@ -255,7 +268,6 @@ namespace RogueTutorial.UI
                 {
                     _player.Set(new WantsToRemoveItem() { Item = item });
                     _world.SetData(RunState.PlayerTurn);
-                    screen.IsDirty = true;
                     return;
                 }
                 keyToCheck++;
@@ -267,7 +279,6 @@ namespace RogueTutorial.UI
             if (keyboard.IsKeyPressed(Keys.Escape))
             {
                 _player.Remove<WantsToUseItem>();
-                screen.IsDirty = true;
                 _world.SetData(RunState.AwaitingInput);
             }
         }

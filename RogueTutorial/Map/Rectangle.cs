@@ -9,7 +9,7 @@ using SadRogue.Primitives;
 
 namespace RogueTutorial.Map
 {
-    internal class Rectangle : ISaveable
+    public class Rectangle : ISaveable
     {
         public int X1 { get; set; }
         public int X2 { get; set; }

@@ -13,12 +13,13 @@ using RogueTutorial.Utils;
 
 namespace RogueTutorial.Map
 {
-    internal class Map : ISaveable
+    public class Map : ISaveable
     {
         private TileType[] _mapGrid;
         private bool[] _blocked;
         private bool[] _explored;
         private Dictionary<Point, List<Entity>> _tileContent;
+        private Dictionary<Point, bool> _bloodyTiles;
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -40,11 +41,31 @@ namespace RogueTutorial.Map
             Rooms = new List<Rectangle>();
             map = new RogueSharp.Map(width, height);
             _tileContent = new Dictionary<Point, List<Entity>>();
+            _bloodyTiles = new Dictionary<Point, bool>();
         }
 
         public TileType GetMapCell(int x, int y)
         {
             return _mapGrid[y * Width + x];
+        }
+
+        public TileType GetMapCellForRender(int x, int y)
+        {
+            if (_mapGrid[y * Width + x] == TileType.Floor && _bloodyTiles.ContainsKey(new Point(x,y)))
+            {
+                return TileType.BloodyFloor;
+            }
+            return _mapGrid[y * Width + x];
+        }
+
+        public bool CellRevealedAndIsWall(int x, int y)
+        {
+            bool retVal = false;
+            if(x >=0 && y >= 0 && x < Width && y < Height)
+            {
+                retVal = GetMapCell(x, y) == TileType.Wall && IsMapCellExplored(x, y);
+            }
+            return retVal;
         }
 
         public void SetMapCell(int x, int y, TileType tileType)
@@ -92,6 +113,11 @@ namespace RogueTutorial.Map
             return map.IsExplored(x, y);
         }
 
+        public void SetMapCellExplored(int x, int y)
+        {
+            updateCellVisibility(x, y, true);
+        }
+
         public Path FindPath(Point start, Point end)
         {
             ICell oldStartCell = map.GetCell(start.X, start.Y);
@@ -132,6 +158,11 @@ namespace RogueTutorial.Map
             return _tileContent.ContainsKey(point) ? _tileContent[point] : new List<Entity>();
         }
 
+        public void SetBloodyCell(Point point)
+        {
+            _bloodyTiles[point] = true;
+        }
+
         public StringBuilder Save(StringBuilder sb, int index)
         {
             sb.AppendLine("Map:" + index.ToString());
@@ -149,7 +180,8 @@ namespace RogueTutorial.Map
                     sb.Append("Point(" + i + "," + j + "):");
                     sb.Append(_blocked[j * Width + i].ToString() + ",");
                     sb.Append(_explored[j * Width + i].ToString() + ",");
-                    sb.Append(_mapGrid[j * Width + i].ToString());
+                    sb.Append(_mapGrid[j * Width + i].ToString() + ",");
+                    sb.Append(_bloodyTiles.ContainsKey(new Point(i, j)));
                     sb.AppendLine();
                 }
             }
@@ -184,6 +216,10 @@ namespace RogueTutorial.Map
                 _blocked[position.Y * Width + position.X] = bool.Parse(cellData[0]);
                 _explored[position.Y * Width + position.X] = bool.Parse(cellData[1]);
                 _mapGrid[position.Y * Width + position.X] = TileTypeExtensions.GetTileTypeFromString(cellData[2]);
+                if (bool.Parse(cellData[3]))
+                {
+                    _bloodyTiles[position] = true;
+                }
                 map.SetCellProperties(position.X, position.Y, !_blocked[position.Y * Width + position.X], !_blocked[position.Y * Width + position.X], _explored[position.Y * Width + position.X]);
                 index++;
             }while(index < data.Count);

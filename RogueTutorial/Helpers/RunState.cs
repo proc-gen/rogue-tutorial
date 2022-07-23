@@ -20,6 +20,7 @@ namespace RogueTutorial.Helpers
         LoadGame,
         NextLevel,
         PlayerDeath,
-        ShowRemoveItem
+        ShowRemoveItem,
+        MagicMapReveal,
     }
 }

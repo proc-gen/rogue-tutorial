@@ -194,6 +194,39 @@ namespace RogueTutorial.Utils
                 case "Viewshed":
                     component = new Viewshed();
                     break;
+                case "Equipped":
+                    component = new Equipped();
+                    break;
+                case "Equippable":
+                    component = new Equippable();
+                    break;
+                case "MeleePowerBonus":
+                    component = new MeleePowerBonus();
+                    break;
+                case "DefenseBonus":
+                    component = new DefenseBonus();
+                    break;
+                case "HungerClock":
+                    component = new HungerClock();
+                    break;
+                case "ProvidesFood":
+                    component = new ProvidesFood();
+                    break;
+                case "MagicMapper":
+                    component = new MagicMapper();
+                    break;
+                case "Hidden":
+                    component = new Hidden();
+                    break;
+                case "EntryTrigger":
+                    component = new EntryTrigger();
+                    break;
+                case "EntityMoved":
+                    component = new EntityMoved();
+                    break;
+                case "SingleActivation":
+                    component = new SingleActivation();
+                    break;
             }
             return component;
         }
@@ -250,6 +283,39 @@ namespace RogueTutorial.Utils
                     break;
                 case "Viewshed":
                     type = typeof(Viewshed);
+                    break;
+                case "Equipped":
+                    type = typeof(Equipped);
+                    break;
+                case "Equippable":
+                    type = typeof(Equippable);
+                    break;
+                case "MeleePowerBonus":
+                    type = typeof(MeleePowerBonus);
+                    break;
+                case "DefenseBonus":
+                    type = typeof(DefenseBonus);
+                    break;
+                case "HungerClock":
+                    type = typeof(HungerClock);
+                    break;
+                case "ProvidesFood":
+                    type = typeof(ProvidesFood);
+                    break;
+                case "MagicMapper":
+                    type = typeof(MagicMapper);
+                    break;
+                case "Hidden":
+                    type = typeof(Hidden);
+                    break;
+                case "EntryTrigger":
+                    type = typeof(EntryTrigger);
+                    break;
+                case "EntityMoved":
+                    type = typeof(EntityMoved);
+                    break;
+                case "SingleActivation":
+                    type = typeof(SingleActivation);
                     break;
             }
             return type;

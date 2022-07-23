@@ -12,23 +12,17 @@ Libraries In Use:
    - I finally ran into a point where I needed something like RLTK in order to do the FOV calculations from section 2.4. Between this and GoRogue, this seemed like it would be easier to implement without a lot of refactoring for the maps. I'm sure that I'll find other uses for it in the future.
  
 Completed:
- - Section 2.0 - Hello World (7/1/2022)
- - Section 2.1 - Entities and Components (7/2/2022)
- - Section 2.2 - Walking a Map (7/2/2022)
- - Section 2.3 - A More Interesting Map (7/2/2022)
- - Section 2.4 - Field of View (7/3/2022)
- - Section 2.5 - Monsters (7/4/2022)
- - Section 2.6 - Dealing Damage (7/5/2022)
- - Section 2.7 - User Interface (7/6/2022)
- - Section 2.8 - Items and Inventory (7/7/2022)
- - Section 2.9 - Ranged Scrolls/Targeting (7/15/2022)
- - Section 2.10 - Saving and Loading (7/17/2022)
- - Section 2.11 - Delving Deeper (7/18/2022)
- - Section 2.12 - Difficulty (7/19/2022)
- - Section 2.13 - Equipment (7/22/2022)
+ - Section 2 - Hello Rust (7/23/2022)
+ - Section 3.1 - Nice Walls with Bitsets (7/23/2022)
+ - Section 3.2 - Bloodstains (7/23/2022)
+ - Section 3.3 - Particle Effects (7/23/2022)
+ - Section 3.4 - Hunger Clock (7/23/2022)
+ - Section 3.5 - Magic Mapping (7/23/2022)
+ - *Section 3.6 - REX Paint Menu SKIPPED*
+ - Section 3.7 - Simple Traps (7/23/2022)
 
 In Progress
- - Minor refactoring and bug fixes
+ - Nothing Yet
 
 Other Notes
  - Section 2.7 - User Interface
@@ -42,4 +36,8 @@ Other Notes
      - This section would have been very straightforward if the Entity struct provided by SimpleECS was easily serializable. Of course, this wasn't the case and meant either finding a new library after writing so much code or writing my own Save/Load code. I opted for the latter because it was more tedious than anything else and not computationally difficult. 
  - Section 2.13 - Equipment
    - SimpleECS Oddities
-     - I'm not sure what caused this to happen, but the equipped entities query for the melee combat system would not work unless it was instantiated in the function using it for calculations. If the query was instantiated at system creation, it wasn't picking up any of the entities that it was supposed to find.'
+     - I'm not sure what caused this to happen, but the equipped entities query for the melee combat system would not work unless it was instantiated in the function using it for calculations. If the query was instantiated at system creation, it wasn't picking up any of the entities that it was supposed to find.
+ - Section 3.6
+   - Everything
+     - Like the Post-Process Scanlines feature from before, loading the REX Paint image is something I may come back to later.
+     - I already have the code accounting for proper spacing depending on which menu options are visible, so there's nothing left to accomplish for this section.

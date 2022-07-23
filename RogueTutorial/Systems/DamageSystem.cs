@@ -19,10 +19,10 @@ namespace RogueTutorial.Systems
 
         public override void Run(TimeSpan delta)
         {
-            query.Foreach((Entity entity, ref CombatStats stats, ref SufferDamage damage) =>
+            query.Foreach((in Map.Map map, Entity entity, ref CombatStats stats, ref SufferDamage damage, ref Position position) =>
             {
                 stats.Hp -= damage.Amount.Sum();
-
+                map.SetBloodyCell(position.Point);
                 entity.Remove<SufferDamage>();
             });
         }

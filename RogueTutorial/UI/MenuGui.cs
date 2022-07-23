@@ -77,7 +77,6 @@ namespace RogueTutorial.UI
         {
             if (keyboard.IsKeyPressed(Keys.Up) || keyboard.IsKeyPressed(Keys.NumPad8) || keyboard.IsKeyPressed(Keys.K))
             {
-                screen.IsDirty = true;
                 switch (_menuState)
                 {
                     case MenuState.ContinueGame:
@@ -97,7 +96,6 @@ namespace RogueTutorial.UI
             }
             if (keyboard.IsKeyPressed(Keys.Down) || keyboard.IsKeyPressed(Keys.NumPad2) || keyboard.IsKeyPressed(Keys.J))
             {
-                screen.IsDirty = true;
                 switch (_menuState)
                 {
                     case MenuState.NewGame:
@@ -120,7 +118,6 @@ namespace RogueTutorial.UI
 
             if (keyboard.IsKeyPressed(Keys.Enter))
             {
-                screen.IsDirty = true;
                 switch (_menuState)
                 {
                     case MenuState.NewGame:
