@@ -98,13 +98,13 @@ namespace RogueTutorial.Map
             ICell oldEndCell = map.GetCell(end.X, end.Y);
             
             //Must make cells walkable prior to pathfinding
-            //map.SetCellProperties(oldStartCell.X, oldStartCell.Y, true, true);
+            map.SetCellProperties(oldStartCell.X, oldStartCell.Y, true, true);
             map.SetCellProperties(oldEndCell.X, oldEndCell.Y, true, true);
 
             PathFinder pathFinder = new PathFinder(map, 1.45);
-            Path path = pathFinder.TryFindShortestPath(oldStartCell, oldEndCell);
+            Path path = pathFinder.TryFindShortestPath(map.GetCell(start.X, start.Y), map.GetCell(end.X, end.Y));
 
-            //map.SetCellProperties(oldStartCell.X, oldStartCell.Y, oldStartCell.IsTransparent, oldStartCell.IsWalkable);
+            map.SetCellProperties(oldStartCell.X, oldStartCell.Y, oldStartCell.IsTransparent, oldStartCell.IsWalkable);
             map.SetCellProperties(oldEndCell.X, oldEndCell.Y, oldEndCell.IsTransparent, oldEndCell.IsWalkable);
 
             return path;
