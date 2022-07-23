@@ -443,10 +443,13 @@ namespace RogueTutorial
                 {
                     if (playerVisibility.VisibleTiles.Any(a => a.X == i && a.Y == j))
                     {
-                        switch (map.GetMapCell(i, j))
+                        switch (map.GetMapCellForRender(i, j))
                         {
                             case TileType.Floor:
                                 TileGlyphs.FloorVisible.CopyAppearanceTo(Surface[i, j]);
+                                break;
+                            case TileType.BloodyFloor:
+                                TileGlyphs.BloodyFloorVisible.CopyAppearanceTo(Surface[i, j]);
                                 break;
                             case TileType.Wall:
                                 TileGlyphs.GetWallGlyph(map, i, j, true).CopyAppearanceTo(Surface[i, j]);
@@ -458,10 +461,13 @@ namespace RogueTutorial
                     }
                     else if (map.IsMapCellExplored(i, j))
                     {
-                        switch (map.GetMapCell(i, j))
+                        switch (map.GetMapCellForRender(i, j))
                         {
                             case TileType.Floor:
                                 TileGlyphs.Floor.CopyAppearanceTo(Surface[i, j]);
+                                break;
+                            case TileType.BloodyFloor:
+                                TileGlyphs.BloodyFloor.CopyAppearanceTo(Surface[i, j]);
                                 break;
                             case TileType.Wall:
                                 TileGlyphs.GetWallGlyph(map, i, j, false).CopyAppearanceTo(Surface[i, j]);

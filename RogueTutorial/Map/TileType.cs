@@ -12,6 +12,7 @@ namespace RogueTutorial.Map
     {
         Wall = '#',
         Floor = '.',
+        BloodyFloor = ',',
         DownStairs = 31
     }
 
@@ -45,6 +46,9 @@ namespace RogueTutorial.Map
 
         public static ColoredGlyph Floor = new ColoredGlyph(Color.Gray, Color.Black, (char)TileType.Floor);
         public static ColoredGlyph FloorVisible = new ColoredGlyph(Color.Green, Color.Black, (char)TileType.Floor);
+
+        public static ColoredGlyph BloodyFloor = new ColoredGlyph(Color.Gray, Color.Black, (char)TileType.Floor);
+        public static ColoredGlyph BloodyFloorVisible = new ColoredGlyph(Color.Green, Color.DarkRed, (char)TileType.BloodyFloor);
 
         public static ColoredGlyph DownStairs = new ColoredGlyph(Color.Gray, Color.Black, (char)TileType.DownStairs);
         public static ColoredGlyph DownStairsVisible = new ColoredGlyph(Color.Cyan, Color.Black, (char)TileType.DownStairs);

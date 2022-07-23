@@ -194,6 +194,18 @@ namespace RogueTutorial.Utils
                 case "Viewshed":
                     component = new Viewshed();
                     break;
+                case "Equipped":
+                    component = new Equipped();
+                    break;
+                case "Equippable":
+                    component = new Equippable();
+                    break;
+                case "MeleePowerBonus":
+                    component = new MeleePowerBonus();
+                    break;
+                case "DefenseBonus":
+                    component = new DefenseBonus();
+                    break;
             }
             return component;
         }
@@ -250,6 +262,18 @@ namespace RogueTutorial.Utils
                     break;
                 case "Viewshed":
                     type = typeof(Viewshed);
+                    break;
+                case "Equipped":
+                    type = typeof(Equipped);
+                    break;
+                case "Equippable":
+                    type = typeof(Equippable);
+                    break;
+                case "MeleePowerBonus":
+                    type = typeof(MeleePowerBonus);
+                    break;
+                case "DefenseBonus":
+                    type = typeof(DefenseBonus);
                     break;
             }
             return type;
