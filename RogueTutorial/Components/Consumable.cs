@@ -9,15 +9,17 @@ using SimpleECS;
 
 namespace RogueTutorial.Components
 {
-    internal class Player : ISaveableComponent
+    internal class Consumable : ISaveableComponent
     {
+        public bool Consumed { get; set; }
+
         public void Load(List<LineData> componentData, Entity[] entities)
         {
         }
 
         public StringBuilder Save(StringBuilder sb, Entity[] entities)
         {
-            sb.AppendLine("Component:Player");
+            sb.AppendLine("Component:Consumable");
             return sb;
         }
     }

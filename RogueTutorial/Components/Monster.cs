@@ -9,7 +9,7 @@ using SimpleECS;
 
 namespace RogueTutorial.Components
 {
-    internal class Player : ISaveableComponent
+    internal class Monster : ISaveableComponent
     {
         public void Load(List<LineData> componentData, Entity[] entities)
         {
@@ -17,7 +17,7 @@ namespace RogueTutorial.Components
 
         public StringBuilder Save(StringBuilder sb, Entity[] entities)
         {
-            sb.AppendLine("Component:Player");
+            sb.AppendLine("Component:Monster");
             return sb;
         }
     }

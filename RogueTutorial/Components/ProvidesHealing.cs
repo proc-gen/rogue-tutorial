@@ -9,15 +9,19 @@ using SimpleECS;
 
 namespace RogueTutorial.Components
 {
-    internal class Player : ISaveableComponent
+    internal class ProvidesHealing : ISaveableComponent
     {
+        public int HealAmount { get; set; }
+
         public void Load(List<LineData> componentData, Entity[] entities)
         {
+            HealAmount = int.Parse(componentData[0].FieldValue);
         }
 
         public StringBuilder Save(StringBuilder sb, Entity[] entities)
         {
-            sb.AppendLine("Component:Player");
+            sb.AppendLine("Component:ProvidesHealing");
+            sb.AppendLine("HealAmount:" + HealAmount.ToString());
             return sb;
         }
     }
