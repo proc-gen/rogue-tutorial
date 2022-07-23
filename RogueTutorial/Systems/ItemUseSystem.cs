@@ -33,7 +33,8 @@ namespace RogueTutorial.Systems
                     {
                         Entity equippedEntity = equippedItemsQuery.GetEntities().Where(a => a.Get<Equipped>().Owner == entity && a.Get<Equipped>().Slot == equippable.Slot).First();
                         equippedEntity.Set(new InBackpack() { Owner = entity });
-
+                        equippedEntity.Remove<Equipped>();
+                        
                         if (entity.Has<Player>())
                         {
                             log.Entries.Add("You unequip the " + equippedEntity.Get<Name>().EntityName);
@@ -42,6 +43,8 @@ namespace RogueTutorial.Systems
                     
                     wantsUse.Item.Set(new Equipped() { Owner = entity, Slot = equippable.Slot });
                     wantsUse.Item.Remove<Position>();
+                    wantsUse.Item.Remove<InBackpack>();
+                    entity.Remove<WantsToUseItem>();
 
                     if (entity.Has<Player>())
                     {
