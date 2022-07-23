@@ -75,6 +75,10 @@ namespace RogueTutorial.Systems
             {
                 power += item.Get<MeleePowerBonus>().Power;
             }
+            if(attacker.TryGet(out HungerClock hungerClock) && hungerClock.State == HungerState.WellFed)
+            {
+                power++;
+            }
 
             return power;
         }

@@ -52,7 +52,7 @@ namespace RogueTutorial.Systems
                         log.Entries.Add("You equip the " + wantsUse.Item.Get<Name>().EntityName);
                     }
                 }
-                if (wantsUse.Item.Has<ProvidesHealing>())
+                else if (wantsUse.Item.Has<ProvidesHealing>())
                 {
                     ProvidesHealing healer = wantsUse.Item.Get<ProvidesHealing>();
                     stats.Hp = Math.Min(stats.MaxHp, stats.Hp + healer.HealAmount);
@@ -61,6 +61,22 @@ namespace RogueTutorial.Systems
                     if (entity.Has<Player>())
                     {
                         log.Entries.Add("You use the " + wantsUse.Item.Get<Name>().EntityName + ", healing " + healer.HealAmount + " hp.");
+                    }
+
+                    if (wantsUse.Item.Has<Consumable>())
+                    {
+                        wantsUse.Item.Get<Consumable>().Consumed = true;
+                    }
+                }
+                else if (wantsUse.Item.Has<ProvidesFood>())
+                {
+                    HungerClock hungerClock = entity.Get<HungerClock>();
+                    hungerClock.Duration = 20;
+                    hungerClock.State = HungerState.WellFed;
+
+                    if (entity.Has<Player>())
+                    {
+                        log.Entries.Add("You eat the " + wantsUse.Item.Get<Name>().EntityName + ".");
                     }
 
                     if (wantsUse.Item.Has<Consumable>())

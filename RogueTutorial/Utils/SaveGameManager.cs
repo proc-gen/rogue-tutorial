@@ -206,6 +206,12 @@ namespace RogueTutorial.Utils
                 case "DefenseBonus":
                     component = new DefenseBonus();
                     break;
+                case "HungerClock":
+                    component = new HungerClock();
+                    break;
+                case "ProvidesFood":
+                    component = new ProvidesFood();
+                    break;
             }
             return component;
         }
@@ -274,6 +280,12 @@ namespace RogueTutorial.Utils
                     break;
                 case "DefenseBonus":
                     type = typeof(DefenseBonus);
+                    break;
+                case "HungerClock":
+                    type = typeof(HungerClock);
+                    break;
+                case "ProvidesFood":
+                    type = typeof(ProvidesFood);
                     break;
             }
             return type;

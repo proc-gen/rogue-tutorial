@@ -109,6 +109,7 @@ namespace RogueTutorial
                 new VisibilitySystem(world),
                 new PositionSystem(world),
                 new ItemCollectionSystem(world),
+                new HungerSystem(world),
                 new MeleeCombatSystem(world),
                 new DamageSystem(world),
                 new DeleteTheDead(world),

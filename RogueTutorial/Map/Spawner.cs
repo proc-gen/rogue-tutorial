@@ -15,7 +15,6 @@ namespace RogueTutorial.Map
     internal class Spawner
     {
         const int MAX_MONSTERS = 4;
-        const int MAX_ITEMS = 2;
 
         public static Entity SpawnPlayer(World world, Point playerStart)
         {
@@ -25,7 +24,8 @@ namespace RogueTutorial.Map
                                 , new Viewshed() { VisibleTiles = new List<Point>(), Range = 8, Dirty = true }
                                 , new Name() { EntityName = "Player" }
                                 , new BlocksTile()
-                                , new CombatStats() { MaxHp = 30, Hp = 30, Defense = 2, Power = 5 });
+                                , new CombatStats() { MaxHp = 30, Hp = 30, Defense = 2, Power = 5 }
+                                , new HungerClock() { State = HungerState.WellFed, Duration = 20});
         }
 
         public static void SpawnRoom(World world, Rectangle room)
@@ -47,7 +47,8 @@ namespace RogueTutorial.Map
                         .Add("Dagger", 3)
                         .Add("Shield", 3)
                         .Add("Long Sword", depth - 1)
-                        .Add("Tower Shield", depth - 1);
+                        .Add("Tower Shield", depth - 1)
+                        .Add("Rations", 10);
         }
 
         private static List<Point> getNonPlayerSpawnPoints(World world, Rectangle room, int depth)
@@ -120,6 +121,9 @@ namespace RogueTutorial.Map
                         break;
                     case "Tower Shield":
                         spawnTowerShield(world, spawnPoint);
+                        break;
+                    case "Rations":
+                        spawnRations(world, spawnPoint);
                         break;
                 }
             }
@@ -229,6 +233,16 @@ namespace RogueTutorial.Map
                                         , new Item()
                                         , new Equippable() { Slot = EquipmentSlot.Shield }
                                         , new DefenseBonus() { Defense = 3 });
+        }
+
+        private static Entity spawnRations(World world, Point start)
+        {
+            return world.CreateEntity(new Position() { Point = start }
+                                        , new Renderable() { Glyph = new ColoredGlyph(Color.Green, Color.Black, '%'), RenderOrder = 2 }
+                                        , new Name() { EntityName = "Rations" }
+                                        , new Item()
+                                        , new ProvidesFood()
+                                        , new Consumable());
         }
     }
 }

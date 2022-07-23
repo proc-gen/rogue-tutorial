@@ -83,14 +83,18 @@ namespace RogueTutorial.Helpers
             Position position = player.Get<Position>();
             Viewshed visibility = player.Get<Viewshed>();
             CombatStats combatStats = player.Get<CombatStats>();
+            HungerClock hungerClock = player.Get<HungerClock>();
 
-            bool canHeal = true;
+            bool canHeal = hungerClock.State > HungerState.Hungry;
 
-            foreach (Point visible in visibility.VisibleTiles)
+            if (canHeal)
             {
-                if (map.GetCellEntities(visible).Any(a => a.Has<Monster>()))
+                foreach (Point visible in visibility.VisibleTiles)
                 {
-                    canHeal = false;
+                    if (map.GetCellEntities(visible).Any(a => a.Has<Monster>()))
+                    {
+                        canHeal = false;
+                    }
                 }
             }
 
