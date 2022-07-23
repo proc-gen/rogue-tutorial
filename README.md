@@ -12,23 +12,10 @@ Libraries In Use:
    - I finally ran into a point where I needed something like RLTK in order to do the FOV calculations from section 2.4. Between this and GoRogue, this seemed like it would be easier to implement without a lot of refactoring for the maps. I'm sure that I'll find other uses for it in the future.
  
 Completed:
- - Section 2.0 - Hello World (7/1/2022)
- - Section 2.1 - Entities and Components (7/2/2022)
- - Section 2.2 - Walking a Map (7/2/2022)
- - Section 2.3 - A More Interesting Map (7/2/2022)
- - Section 2.4 - Field of View (7/3/2022)
- - Section 2.5 - Monsters (7/4/2022)
- - Section 2.6 - Dealing Damage (7/5/2022)
- - Section 2.7 - User Interface (7/6/2022)
- - Section 2.8 - Items and Inventory (7/7/2022)
- - Section 2.9 - Ranged Scrolls/Targeting (7/15/2022)
- - Section 2.10 - Saving and Loading (7/17/2022)
- - Section 2.11 - Delving Deeper (7/18/2022)
- - Section 2.12 - Difficulty (7/19/2022)
- - Section 2.13 - Equipment (7/22/2022)
+ - Section 2 - Hello Rust (7/23/2022)
 
 In Progress
- - Minor refactoring and bug fixes
+ - Section 3.1 - Nice Walls with Bitsets
 
 Other Notes
  - Section 2.7 - User Interface
