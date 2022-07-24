@@ -47,51 +47,29 @@ namespace RogueTutorial
         private void startNewGame(int width, int height)
         {
             clearEntities();
-
+            
+            world.SetData(new Random());
             world.GetData<GameLog>().Entries.Add("Welcome to Rusty Roguelike");
+            
+            IMapBuilder mapBuilder = MapGenerator.BuildRandomMap(width, height, 1);
+            world.SetData(mapBuilder.GetMap());
+            mapBuilder.SpawnEntities(world);
 
-            Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height, 1);
-            Random random = new Random();
+            Spawner.SpawnPlayer(world, mapBuilder.GetStartingPosition());
 
-            world.SetData(map);
-            world.SetData(random);
-
-            Spawner.SpawnPlayer(world, map.Rooms.First().Center());
-
-            populateRooms(map);
         }
 
         private void descendLevel(int width, int height)
         {
             clearEntities(false);
 
-            Map.Map map = MapGenerator.RoomsAndCorridorsGenerator(width, height, world.GetData<Map.Map>().Depth + 1);
-            world.SetData(map);
-            populateRooms(map);
+            IMapBuilder mapBuilder = MapGenerator.BuildRandomMap(width, height, world.GetData<Map.Map>().Depth + 1);
+            world.SetData(mapBuilder.GetMap());
+            mapBuilder.SpawnEntities(world);
 
-            Entity player = PlayerFunctions.GetPlayer(world);
-
-            Position playerPosition = player.Get<Position>();
-            playerPosition.Point = map.Rooms.First().Center();
-            player.Set(playerPosition);
-
-            Viewshed playerView = player.Get<Viewshed>();
-            playerView.Dirty = true;
-            player.Set(playerView);
-
-            CombatStats playerStats = player.Get<CombatStats>();
-            playerStats.Hp = Math.Max(playerStats.Hp, playerStats.MaxHp / 2);
-            player.Set(playerStats);
+            Spawner.SpawnPlayer(world, mapBuilder.GetStartingPosition());
 
             world.GetData<GameLog>().Entries.Add("You take a moment to heal as you descend to the next level.");
-        }
-
-        private void populateRooms(Map.Map map)
-        {
-            for (int i = 1; i < map.Rooms.Count; i++)
-            {
-                Spawner.SpawnRoom(world, map.Rooms[i]);
-            }
         }
 
         private void initializeSystems()

@@ -16,16 +16,35 @@ namespace RogueTutorial.Map
     {
         const int MAX_MONSTERS = 4;
 
-        public static Entity SpawnPlayer(World world, Point playerStart)
+        public static void SpawnPlayer(World world, Point playerStart)
         {
-            return world.CreateEntity(new Position() { Point =  playerStart}
-                                , new Renderable() { Glyph = new ColoredGlyph(Color.Yellow, Color.Black, '@'), RenderOrder = 0 }
-                                , new Player()
-                                , new Viewshed() { VisibleTiles = new List<Point>(), Range = 8, Dirty = true }
-                                , new Name() { EntityName = "Player" }
-                                , new BlocksTile()
-                                , new CombatStats() { MaxHp = 30, Hp = 30, Defense = 2, Power = 5 }
-                                , new HungerClock() { State = HungerState.WellFed, Duration = 20});
+            if (!PlayerFunctions.PlayerExists(world))
+            {
+                world.CreateEntity(new Position() { Point = playerStart }
+                                    , new Renderable() { Glyph = new ColoredGlyph(Color.Yellow, Color.Black, '@'), RenderOrder = 0 }
+                                    , new Player()
+                                    , new Viewshed() { VisibleTiles = new List<Point>(), Range = 8, Dirty = true }
+                                    , new Name() { EntityName = "Player" }
+                                    , new BlocksTile()
+                                    , new CombatStats() { MaxHp = 30, Hp = 30, Defense = 2, Power = 5 }
+                                    , new HungerClock() { State = HungerState.WellFed, Duration = 20 });
+            }
+            else
+            {
+                Entity player = PlayerFunctions.GetPlayer(world);
+
+                Position playerPosition = player.Get<Position>();
+                playerPosition.Point = playerStart;
+                player.Set(playerPosition);
+
+                Viewshed playerView = player.Get<Viewshed>();
+                playerView.Dirty = true;
+                player.Set(playerView);
+
+                CombatStats playerStats = player.Get<CombatStats>();
+                playerStats.Hp = Math.Max(playerStats.Hp, playerStats.MaxHp / 2);
+                player.Set(playerStats);
+            }
         }
 
         public static void SpawnRoom(World world, Rectangle room)

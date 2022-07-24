@@ -14,9 +14,10 @@ Libraries In Use:
 Completed:
  - Section 2 - Hello Rust (7/23/2022)
  - Section 3 - Stretch Goals (7/23/2022)
+ - Section 4.1 - Refactor Map Building (7/24/2022)
 
 In Progress
- - Section 4.1 - Refactor Map Building
+ - Section 4.2 - Map Building Test Harness
 
 Other Notes
  - Section 2.7 - User Interface

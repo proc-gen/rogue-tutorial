@@ -17,6 +17,11 @@ namespace RogueTutorial.Helpers
             return world.CreateQuery().Has<Player>().GetEntities().First();
         }
 
+        public static bool PlayerExists(World world)
+        {
+            return world.CreateQuery().Has<Player>().GetEntities().Any();
+        }
+
         public static bool TryMovePlayer(World world, Direction direction)
         {
             bool retVal = false;

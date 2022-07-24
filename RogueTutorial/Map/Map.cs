@@ -24,7 +24,6 @@ namespace RogueTutorial.Map
         public int Width { get; private set; }
         public int Height { get; private set; }
         public int Depth { get; private set; }
-        public List<Rectangle> Rooms { get; set; }
 
         private IMap map { get; set; }
 
@@ -38,7 +37,6 @@ namespace RogueTutorial.Map
             _blocked = new bool[width * height];
             _explored = new bool[width * height];
 
-            Rooms = new List<Rectangle>();
             map = new RogueSharp.Map(width, height);
             _tileContent = new Dictionary<Point, List<Entity>>();
             _bloodyTiles = new Dictionary<Point, bool>();
@@ -169,10 +167,6 @@ namespace RogueTutorial.Map
             sb.AppendLine("Width:" + Width.ToString());
             sb.AppendLine("Height:" + Height.ToString());
             sb.AppendLine("Depth:" + Depth.ToString());
-            for (int i = 0; i < Rooms.Count; i++)
-            {
-                sb = Rooms[i].Save(sb, i);
-            }
             for(int i = 0; i < Width; i++)
             {
                 for(int j = 0; j < Height; j++)
@@ -190,21 +184,7 @@ namespace RogueTutorial.Map
 
         public void Load(List<LineData> data, int index)
         {
-            index = loadRooms(data, index);
             index = populateCells(data, index);
-        }
-
-        private int loadRooms(List<LineData> data, int index)
-        {
-            while (data[index].FieldName == "Rectangle")
-            {
-                Rectangle room = new Rectangle(0, 0, 0, 0);
-                room.Load(data, index);
-                Rooms.Add(room);
-                index += 5;
-            }
-
-            return index;
         }
 
         private int populateCells(List<LineData> data, int index)
