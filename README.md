@@ -13,16 +13,10 @@ Libraries In Use:
  
 Completed:
  - Section 2 - Hello Rust (7/23/2022)
- - Section 3.1 - Nice Walls with Bitsets (7/23/2022)
- - Section 3.2 - Bloodstains (7/23/2022)
- - Section 3.3 - Particle Effects (7/23/2022)
- - Section 3.4 - Hunger Clock (7/23/2022)
- - Section 3.5 - Magic Mapping (7/23/2022)
- - *Section 3.6 - REX Paint Menu SKIPPED*
- - Section 3.7 - Simple Traps (7/23/2022)
+ - Section 3 - Stretch Goals (7/23/2022)
 
 In Progress
- - Nothing Yet
+ - Section 4.1 - Refactor Map Building
 
 Other Notes
  - Section 2.7 - User Interface
