@@ -42,6 +42,39 @@ namespace RogueTutorial.Map
             _bloodyTiles = new Dictionary<Point, bool>();
         }
 
+        private Map(TileType[] mapGrid, bool[] blocked, bool[] explored, int width, int height, int depth)
+        {
+            Width = width;
+            Height = height;
+            Depth = depth;
+
+            _mapGrid = new TileType[width * height];
+            _blocked = new bool[width * height];
+            _explored = new bool[width * height];
+
+            _tileContent = new Dictionary<Point, List<Entity>>();
+            _bloodyTiles = new Dictionary<Point, bool>();
+
+            map = new RogueSharp.Map(width, height);
+
+            for(int i = 0; i < width; i++)
+            {
+                for(int j = 0; j < height; j++)
+                {
+                    _mapGrid[j * Width + i] = mapGrid[j * Width + i];
+                    _blocked[j * Width + i] = blocked[j * Width + i];
+                    _explored[j * Width + i] = explored[j * Width + i];
+
+                    map.SetCellProperties(i, j, _mapGrid[j * Width + i] != TileType.Wall, _mapGrid[j * Width + i] != TileType.Wall, true);
+                }
+            }
+        }
+
+        public Map CopyForSnapshot()
+        {
+            return new Map(_mapGrid, _blocked, _explored, Width, Height, Depth);
+        }
+
         public TileType GetMapCell(int x, int y)
         {
             return _mapGrid[y * Width + x];

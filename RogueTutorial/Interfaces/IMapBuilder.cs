@@ -13,10 +13,10 @@ namespace RogueTutorial.Interfaces
     {
         Map.Map GetMap();
         Map.Map Build(int width, int height, int depth);
-
         void SpawnEntities(World world);
-
         Point GetStartingPosition();
+        List<Map.Map> GetSnapshotHistory();
+        void TakeSnapshot();
 
         public static void ApplyRoomToMap(ref Map.Rectangle room, ref Map.Map map)
         {

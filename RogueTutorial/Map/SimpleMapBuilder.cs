@@ -14,10 +14,12 @@ namespace RogueTutorial.Map
         private Map _map;
         private Point _startingPosition = new Point(0, 0);
         private List<Rectangle> _rooms { get; set; }
+        private List<Map> _snapshots { get; set; }
 
         public SimpleMapBuilder()
         {
             _rooms = new List<Rectangle>();
+            _snapshots = new List<Map>();
         }
 
         public Map GetMap()
@@ -56,6 +58,8 @@ namespace RogueTutorial.Map
                 if (canAdd)
                 {
                     IMapBuilder.ApplyRoomToMap(ref room, ref _map);
+                    TakeSnapshot();
+
                     if (_rooms.Any())
                     {
                         Point newCenter = room.Center();
@@ -73,11 +77,13 @@ namespace RogueTutorial.Map
                         }
                     }
                     _rooms.Add(room);
+                    TakeSnapshot();
                 }
             }
 
             setStairsPosition();
             _startingPosition = _rooms.First().Center();
+            TakeSnapshot();
             return _map;
         }
 
@@ -100,6 +106,19 @@ namespace RogueTutorial.Map
         public Point GetStartingPosition()
         {
             return _startingPosition;
+        }
+
+        public List<Map> GetSnapshotHistory()
+        {
+            return _snapshots;
+        }
+
+        public void TakeSnapshot()
+        {
+            if (RootScreen.SHOW_MAPGEN_VISUALIZER)
+            {
+                _snapshots.Add(_map.CopyForSnapshot());
+            }
         }
     }
 }

@@ -22,5 +22,6 @@ namespace RogueTutorial.Helpers
         PlayerDeath,
         ShowRemoveItem,
         MagicMapReveal,
+        MapGeneration,
     }
 }

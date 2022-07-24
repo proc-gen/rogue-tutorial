@@ -19,8 +19,10 @@ using RogueTutorial.Utils;
 
 namespace RogueTutorial
 {
-    internal class RootScreen : SadConsole.Console
+    public class RootScreen : SadConsole.Console
     {
+        public const bool SHOW_MAPGEN_VISUALIZER = true;
+
         World world;
         Query renderablesQuery;
         GameGui gameGui;
@@ -46,30 +48,35 @@ namespace RogueTutorial
 
         private void startNewGame(int width, int height)
         {
-            clearEntities();
-            
-            world.SetData(new Random());
-            world.GetData<GameLog>().Entries.Add("Welcome to Rusty Roguelike");
-            
-            IMapBuilder mapBuilder = MapGenerator.BuildRandomMap(width, height, 1);
-            world.SetData(mapBuilder.GetMap());
-            mapBuilder.SpawnEntities(world);
-
-            Spawner.SpawnPlayer(world, mapBuilder.GetStartingPosition());
-
+            buildLevel(width, height, true);
         }
 
         private void descendLevel(int width, int height)
         {
-            clearEntities(false);
+            buildLevel(width, height, false);
+        }
 
-            IMapBuilder mapBuilder = MapGenerator.BuildRandomMap(width, height, world.GetData<Map.Map>().Depth + 1);
+        private void buildLevel(int width, int height, bool newGame)
+        {
+            clearEntities(newGame);
+            int depth = 1;
+            if (newGame)
+            {
+                world.GetData<GameLog>().Entries.Add("Welcome to Rusty Roguelike");
+                world.SetData(new Random());
+            }
+            else
+            {
+                world.GetData<GameLog>().Entries.Add("You take a moment to heal as you descend to the next level.");
+                depth = world.GetData<Map.Map>().Depth + 1;
+            }
+
+            IMapBuilder mapBuilder = MapGenerator.BuildRandomMap(width, height, depth);
             world.SetData(mapBuilder.GetMap());
+            world.SetData(mapBuilder.GetSnapshotHistory());
             mapBuilder.SpawnEntities(world);
 
             Spawner.SpawnPlayer(world, mapBuilder.GetStartingPosition());
-
-            world.GetData<GameLog>().Entries.Add("You take a moment to heal as you descend to the next level.");
         }
 
         private void initializeSystems()
@@ -115,12 +122,16 @@ namespace RogueTutorial
                 case RunState.PreRun:
                     startNewGame(Width, Height - 10);
                     runSystems(delta);
-                    world.SetData(RunState.AwaitingInput);
+                    world.SetData(SHOW_MAPGEN_VISUALIZER 
+                        ? RunState.MapGeneration                                    
+                        : RunState.AwaitingInput);
                     break;
                 case RunState.NextLevel:
                     descendLevel(Width, Height - 10);
                     runSystems(delta);
-                    world.SetData(RunState.AwaitingInput);
+                    world.SetData(SHOW_MAPGEN_VISUALIZER
+                        ? RunState.MapGeneration
+                        : RunState.AwaitingInput);
                     break;
                 case RunState.AwaitingInput:
                 case RunState.ShowInventory:
@@ -159,6 +170,13 @@ namespace RogueTutorial
                     break;
                 case RunState.MagicMapReveal:
                     magicMapReveal();
+                    break;
+                case RunState.MapGeneration:
+                    if (!world.GetData<List<Map.Map>>().Any())
+                    {
+                        runSystems(delta);
+                        world.SetData(RunState.AwaitingInput);
+                    }
                     break;
             }
 
@@ -247,6 +265,9 @@ namespace RogueTutorial
                     break;
                 case RunState.ShowRemoveItem:
                     processKeyboardRemoveItem(keyboard);
+                    break;
+                case RunState.MapGeneration:
+                    processKeyboardMapGeneration(keyboard);
                     break;
             }
 
@@ -391,6 +412,17 @@ namespace RogueTutorial
             }
         }
 
+        private void processKeyboardMapGeneration(Keyboard keyboard)
+        {
+            if (keyboard.HasKeysPressed)
+            {
+                if (world.GetData<List<Map.Map>>().Any())
+                {
+                    world.GetData<List<Map.Map>>().RemoveAt(0);
+                }
+            }
+        }
+
         public override bool ProcessMouse(MouseScreenObjectState state)
         {
             if (state.Mouse.IsMouseOverScreenObjectSurface(this))
@@ -434,13 +466,28 @@ namespace RogueTutorial
 
         private void renderGame()
         {
-            Map.Map map = world.GetData<Map.Map>();
+            Map.Map map = null;
+
+            if (SHOW_MAPGEN_VISUALIZER 
+                && world.GetData<RunState>() == RunState.MapGeneration
+                && world.GetData<List<Map.Map>>().Any())
+            {
+                map = world.GetData<List<Map.Map>>().First();
+            }
+            else
+            {
+                map = world.GetData<Map.Map>();
+            }
+
             Entity player = PlayerFunctions.GetPlayer(world);
             Viewshed playerVisibility = player.Get<Viewshed>();
 
             renderMap(map, playerVisibility);
-            renderEntities(playerVisibility);
-            gameGui.Render(Surface, mousePosition);
+            if (world.GetData<RunState>() != RunState.MapGeneration)
+            {
+                renderEntities(playerVisibility);
+                gameGui.Render(Surface, mousePosition);
+            }
         }
 
         private void renderMap(Map.Map map, Viewshed playerVisibility)
