@@ -11,8 +11,9 @@ namespace RogueTutorial.Interfaces
 {
     public interface IMapBuilder
     {
+        string GetName();
         Map.Map GetMap();
-        Map.Map Build(int width, int height, int depth);
+        void Build(int width, int height, int depth);
         void SpawnEntities(World world);
         Point GetStartingPosition();
         List<Map.Map> GetSnapshotHistory();

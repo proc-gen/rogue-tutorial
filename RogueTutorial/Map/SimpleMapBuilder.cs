@@ -22,11 +22,16 @@ namespace RogueTutorial.Map
             _snapshots = new List<Map>();
         }
 
+        public string GetName()
+        {
+            return "Simple Map Builder";
+        }
+
         public Map GetMap()
         {
             return _map;
         }
-        public Map Build(int width, int height, int depth)
+        public void Build(int width, int height, int depth)
         {
             _map = new Map(width, height, depth);
 
@@ -84,7 +89,6 @@ namespace RogueTutorial.Map
             setStairsPosition();
             _startingPosition = _rooms.First().Center();
             TakeSnapshot();
-            return _map;
         }
 
         private void setStairsPosition()

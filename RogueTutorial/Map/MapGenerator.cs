@@ -14,7 +14,18 @@ namespace RogueTutorial.Map
     {
         public static IMapBuilder BuildRandomMap(int width, int height, int depth)
         {
-            IMapBuilder mapBuilder = new SimpleMapBuilder();
+            IMapBuilder mapBuilder = null;
+            Random random = new Random();
+            switch (random.Next(2))
+            {
+                case 0:
+                    mapBuilder = new SimpleMapBuilder();
+                    break;
+                default:
+                    mapBuilder = new BspDungeonBuilder();
+                    break;
+            }
+            
             mapBuilder.Build(width, height, depth);
             return mapBuilder;
         }
